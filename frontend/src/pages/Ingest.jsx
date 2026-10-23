@@ -44,20 +44,20 @@ export default function Ingest() {
       </PageHeader>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <Panel className="lg:col-span-5" eyebrow="Upload" title="Add a data file" testId="upload-panel">
-          {!can("upload") && <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">Your role can view ingested data but not upload. Analysts and Admins can upload.</div>}
+          {!can("upload") && <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-sm px-3 py-2 mb-3">Your role can view ingested data but not upload. Analysts and Admins can upload.</div>}
           <div className="space-y-3">
             <Select value={domain} onValueChange={setDomain}>
-              <SelectTrigger data-testid="ingest-domain-select" className="rounded-lg"><SelectValue /></SelectTrigger>
+              <SelectTrigger data-testid="ingest-domain-select" className="rounded-sm"><SelectValue /></SelectTrigger>
               <SelectContent>{GROUPS.map((g) => Object.entries(DOMAINS).filter(([, v]) => v.group === g).map(([k, v]) => <SelectItem key={k} value={k}>{g.split(" ")[0]} · {v.label}</SelectItem>))}</SelectContent>
             </Select>
             <Select value={cp} onValueChange={setCp}>
-              <SelectTrigger data-testid="ingest-counterparty-select" className="rounded-lg"><SelectValue placeholder="Counterparty (partner, supplier or customer)" /></SelectTrigger>
+              <SelectTrigger data-testid="ingest-counterparty-select" className="rounded-sm"><SelectValue placeholder="Counterparty (partner, supplier or customer)" /></SelectTrigger>
               <SelectContent>{cps.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
             {info && <p className="text-xs text-slate-500">{info.desc}</p>}
             <div onClick={() => input.current?.click()} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
               onDrop={(e) => { e.preventDefault(); setDrag(false); setFile(e.dataTransfer.files[0]); }} data-testid="csv-upload-dropzone"
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${drag ? "border-emerald-500 bg-emerald-50" : "border-slate-200 bg-slate-50/60 hover:border-emerald-300"}`}>
+              className={`border-2 border-dashed rounded-md p-8 text-center cursor-pointer transition-colors ${drag ? "border-emerald-500 bg-emerald-50" : "border-slate-200 bg-slate-50/60 hover:border-emerald-300"}`}>
               <div className="h-11 w-11 rounded-full bg-white border border-slate-200 grid place-items-center mx-auto"><UploadCloud className="h-5 w-5 text-emerald-600" /></div>
               <div className="text-sm font-semibold text-slate-800 mt-3">{file ? file.name : "Drop CSV / XLSX here or click to browse"}</div>
               <div className="text-[11px] text-slate-400 mt-1">Max 10 MB · re-uploaded rows are skipped automatically</div>

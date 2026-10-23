@@ -9,7 +9,7 @@ import { PageHeader, StatusChip, DomainBadge, Money, Empty, SeverityDot } from "
 
 const F = ({ value, onChange, placeholder, items, testId }) => (
   <Select value={value} onValueChange={onChange}>
-    <SelectTrigger className="w-full sm:w-44 bg-white rounded-lg" data-testid={testId}><SelectValue placeholder={placeholder} /></SelectTrigger>
+    <SelectTrigger className="w-full sm:w-44 bg-white rounded-sm" data-testid={testId}><SelectValue placeholder={placeholder} /></SelectTrigger>
     <SelectContent>
       <SelectItem value="all">{placeholder}</SelectItem>
       {items.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}

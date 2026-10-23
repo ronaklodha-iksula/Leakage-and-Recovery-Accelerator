@@ -47,13 +47,13 @@ export default function Copilot() {
       <div className="flex-1 overflow-y-auto panel p-5 space-y-5" data-testid="copilot-messages">
         {!msgs.length && (
           <div className="grid sm:grid-cols-2 gap-3">
-            {PROMPTS.map((p, i) => <button key={p} onClick={() => ask(p)} data-testid={`copilot-prompt-${i}`} className="text-left text-sm p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-indigo-200 hover:bg-indigo-50/60 text-slate-700 transition-colors"><Sparkles className="h-4 w-4 text-indigo-500 mb-2" />{p}</button>)}
+            {PROMPTS.map((p, i) => <button key={p} onClick={() => ask(p)} data-testid={`copilot-prompt-${i}`} className="text-left text-sm p-4 rounded-md border border-slate-200 bg-slate-50/60 hover:border-indigo-200 hover:bg-indigo-50/60 text-slate-700 transition-colors"><Sparkles className="h-4 w-4 text-indigo-500 mb-2" />{p}</button>)}
           </div>
         )}
         {msgs.map((m, i) => (
           <div key={i} className={m.role === "user" ? "flex justify-end" : "flex gap-3"} data-testid={`copilot-msg-${i}`}>
-            {m.role !== "user" && <div className="h-7 w-7 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 grid place-items-center"><Sparkles className="h-3.5 w-3.5" /></div>}
-            <div className={`max-w-3xl text-sm whitespace-pre-wrap leading-relaxed ${m.role === "user" ? "bg-emerald-600 text-white rounded-2xl rounded-br-md px-4 py-2.5" : "text-slate-700"}`}>
+            {m.role !== "user" && <div className="h-7 w-7 shrink-0 rounded-sm bg-indigo-50 text-indigo-600 grid place-items-center"><Sparkles className="h-3.5 w-3.5" /></div>}
+            <div className={`max-w-3xl text-sm whitespace-pre-wrap leading-relaxed ${m.role === "user" ? "bg-emerald-600 text-white rounded-md px-4 py-2.5" : "text-slate-700"}`}>
               {m.text}{m.streaming && <span className="caret" />}
             </div>
           </div>

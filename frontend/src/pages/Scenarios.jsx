@@ -37,7 +37,7 @@ export default function Scenarios() {
                 return (
                   <Link key={d.key} to={`/app/leakages?domain=${d.key}`} data-testid={`scenario-card-${d.key}`}
                     className="panel p-5 flex flex-col hover:-translate-y-0.5 hover:shadow-md transition-[transform,box-shadow] duration-200">
-                    <div className="h-9 w-9 rounded-lg grid place-items-center text-white text-xs font-bold" style={{ background: meta.color }}>{meta.short.slice(0, 2).toUpperCase()}</div>
+                    <div className="h-9 w-9 rounded-sm grid place-items-center text-white text-xs font-bold" style={{ background: meta.color }}>{meta.short.slice(0, 2).toUpperCase()}</div>
                     <div className="font-semibold text-slate-900 mt-4">{d.label}</div>
                     <p className="text-sm text-slate-500 mt-1.5 flex-1">{d.desc}</p>
                     <div className="text-[11px] text-slate-400 mt-3">Data: {DATA[d.key]}</div>

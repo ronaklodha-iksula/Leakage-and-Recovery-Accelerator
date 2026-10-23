@@ -4,19 +4,19 @@ import { Money, PageHeader, DomainBadge, SeverityDot } from "@/components/common
 import { daysUntil, money } from "@/lib/format";
 
 const COLS = [
-  { key: "identified", label: "Identified", statuses: ["OPEN"], dot: "bg-amber-500" },
-  { key: "review", label: "Under review", statuses: ["IN_REVIEW"], dot: "bg-sky-500" },
-  { key: "escalated", label: "Escalated to senior", statuses: ["ESCALATED"], dot: "bg-rose-500" },
-  { key: "approved", label: "Approved · ready to send", statuses: ["APPROVED"], dot: "bg-emerald-500" },
-  { key: "claim", label: "Claim with counterparty", statuses: ["CLAIM_SENT", "PARTIALLY_RECOVERED"], dot: "bg-indigo-500" },
-  { key: "recovered", label: "Recovered", statuses: ["RECOVERED"], dot: "bg-emerald-700" },
-  { key: "closed", label: "Closed / denied", statuses: ["DENIED", "WRITTEN_OFF", "DISMISSED"], dot: "bg-slate-400" },
+  { key: "identified", label: "Identified", statuses: ["OPEN"], dot: "border-t-rose-500" },
+  { key: "review", label: "Under review", statuses: ["IN_REVIEW"], dot: "border-t-sky-500" },
+  { key: "escalated", label: "Escalated to senior", statuses: ["ESCALATED"], dot: "border-t-amber-500" },
+  { key: "approved", label: "Approved · ready to send", statuses: ["APPROVED"], dot: "border-t-teal-500" },
+  { key: "claim", label: "Claim with counterparty", statuses: ["CLAIM_SENT", "PARTIALLY_RECOVERED"], dot: "border-t-violet-500" },
+  { key: "recovered", label: "Recovered", statuses: ["RECOVERED"], dot: "border-t-emerald-500" },
+  { key: "closed", label: "Closed / denied", statuses: ["DENIED", "WRITTEN_OFF", "DISMISSED"], dot: "border-t-slate-400" },
 ];
 
 const Card = ({ c }) => {
   const d = daysUntil(c.window_ends_at);
   return (
-    <Link to={`/app/leakages/${c.id}`} data-testid={`pipeline-card-${c.number}`} className="block panel p-3 hover:-translate-y-0.5 hover:shadow-md transition-[transform,box-shadow] duration-150">
+    <Link to={`/app/leakages/${c.id}`} data-testid={`pipeline-card-${c.number}`} className="block panel p-3 hover:-translate-y-0.5 hover:border-slate-400 transition-transform duration-150">
       <div className="flex justify-between items-center">
         <span className="num text-xs font-semibold text-slate-500 flex items-center gap-1.5"><SeverityDot severity={c.severity} />{c.number}</span>
         <DomainBadge domain={c.domain} />
@@ -42,12 +42,12 @@ export default function Pipeline() {
           const items = (data || []).filter((c) => col.statuses.includes(c.status));
           const sum = items.reduce((s, c) => s + c.leak_amount, 0);
           return (
-            <div key={col.key} className="w-64 shrink-0 rounded-xl bg-slate-100/70 border border-slate-200/80" data-testid={`pipeline-col-${col.key}`}>
-              <div className="p-3">
-                <div className="text-sm font-semibold text-slate-900 flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${col.dot}`} />{col.label}</div>
+            <div key={col.key} className={`w-64 shrink-0 rounded-md bg-[#fbfbfc] border border-border border-t-2 ${col.dot}`} data-testid={`pipeline-col-${col.key}`}>
+              <div className="p-3 border-b border-border">
+                <div className="text-sm font-medium text-slate-900">{col.label}</div>
                 <div className="text-[11px] text-slate-500 num mt-0.5">{items.length} · {money(sum)}</div>
               </div>
-              <div className="px-2 pb-2 space-y-2 max-h-[70vh] overflow-y-auto">{items.map((c) => <Card key={c.id} c={c} />)}</div>
+              <div className="p-2 space-y-2 max-h-[70vh] overflow-y-auto">{items.map((c) => <Card key={c.id} c={c} />)}</div>
             </div>
           );
         })}

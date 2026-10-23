@@ -6,14 +6,11 @@ import { DOMAINS, money, daysUntil } from "@/lib/format";
 import { PageHeader, Panel, StatusChip, Money, Empty } from "@/components/common";
 import { useMe } from "@/context/MeContext";
 
-const KPI = ({ label, value, sub, icon: Icon, tone, testId, i, children }) => (
-  <div data-testid={testId} className={`panel p-5 rise rise-${i} hover:shadow-md transition-shadow duration-200`}>
-    <div className="flex items-center justify-between">
-      <span className="text-xs font-semibold text-slate-500">{label}</span>
-      <span className={`h-8 w-8 rounded-lg grid place-items-center ${tone}`}><Icon className="h-4 w-4" /></span>
-    </div>
-    <div className="num text-2xl xl:text-[28px] font-bold text-slate-900 mt-3">{value}</div>
-    {sub && <div className="text-xs text-slate-500 mt-1.5">{sub}</div>}
+const KPI = ({ label, value, sub, tone, testId, i, children }) => (
+  <div data-testid={testId} className={`panel p-5 rise rise-${i}`}>
+    <div className="eyebrow">{label}</div>
+    <div className={`num text-2xl xl:text-3xl mt-3 ${tone}`}>{value}</div>
+    {sub && <div className="text-xs text-slate-500 mt-2">{sub}</div>}
     {children}
   </div>
 );
@@ -21,7 +18,7 @@ const KPI = ({ label, value, sub, icon: Icon, tone, testId, i, children }) => (
 const tip = { contentStyle: { background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12, boxShadow: "0 4px 12px rgba(15,23,42,.08)" }, formatter: (v) => money(v) };
 
 const CaseRow = ({ c, right }) => (
-  <Link to={`/app/leakages/${c.id}`} data-testid={`dash-case-${c.number}`} className="flex items-center justify-between gap-3 py-2.5 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-lg">
+  <Link to={`/app/leakages/${c.id}`} data-testid={`dash-case-${c.number}`} className="flex items-center justify-between gap-3 py-2.5 border-b border-border last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-sm">
     <div className="min-w-0">
       <div className="text-sm font-semibold text-slate-900 flex items-center gap-2"><span className="num text-xs text-emerald-700">{c.number}</span><span className="truncate">{c.counterparty_name}</span></div>
       <div className="text-xs text-slate-400 truncate num">{c.ref}</div>
@@ -45,12 +42,12 @@ export default function Dashboard() {
         <Link to="/app/leakages" data-testid="dash-view-leakages" className="btn-primary">All leakages <ArrowUpRight className="h-4 w-4" /></Link>
       </PageHeader>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <KPI i={1} testId="kpi-identified" icon={TrendingDown} tone="bg-amber-50 text-amber-600" label="Leakage identified" value={money(k.identified)} sub={`${k.cases} cases`} />
-        <KPI i={2} testId="kpi-recoverable" icon={Wallet} tone="bg-sky-50 text-sky-600" label="Recoverable (open)" value={money(k.recoverable)} sub={`${k.open_cases} open cases`} />
-        <KPI i={3} testId="kpi-in-claim" icon={Send} tone="bg-indigo-50 text-indigo-600" label="In claim" value={money(k.in_claim)} sub="Awaiting counterparty" />
-        <KPI i={4} testId="kpi-recovered" icon={CircleDollarSign} tone="bg-emerald-50 text-emerald-600" label="Recovered" value={money(k.recovered)} sub={`Written off ${money(k.written_off)}`} />
-        <KPI i={4} testId="kpi-recovery-rate" icon={Gauge} tone="bg-teal-50 text-teal-600" label="Recovery rate" value={`${k.recovery_rate}%`}>
-          <div className="h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden"><div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-[width] duration-700" style={{ width: `${Math.min(k.recovery_rate, 100)}%` }} /></div>
+        <KPI i={1} testId="kpi-identified" icon={TrendingDown} tone="text-rose-600" label="Leakage identified" value={money(k.identified)} sub={`${k.cases} cases`} />
+        <KPI i={2} testId="kpi-recoverable" icon={Wallet} tone="text-slate-900" label="Recoverable (open)" value={money(k.recoverable)} sub={`${k.open_cases} open cases`} />
+        <KPI i={3} testId="kpi-in-claim" icon={Send} tone="text-amber-600" label="In claim" value={money(k.in_claim)} sub="Awaiting counterparty" />
+        <KPI i={4} testId="kpi-recovered" icon={CircleDollarSign} tone="text-emerald-600" label="Recovered" value={money(k.recovered)} sub={`Written off ${money(k.written_off)}`} />
+        <KPI i={4} testId="kpi-recovery-rate" icon={Gauge} tone="text-slate-900" label="Recovery rate" value={`${k.recovery_rate}%`}>
+          <div className="h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden"><div className="h-full bg-emerald-500 transition-[width] duration-700" style={{ width: `${Math.min(k.recovery_rate, 100)}%` }} /></div>
         </KPI>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6">
@@ -108,7 +105,7 @@ export default function Dashboard() {
         </Panel>
         <Panel className="md:col-span-3" eyebrow="Assigned to you" title="My queue" testId="panel-my-queue">
           {data.assurance_pending > 0 && (
-            <Link to="/app/assurance" className="flex items-center gap-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-3" data-testid="dash-assurance-pending">
+            <Link to="/app/assurance" className="flex items-center gap-2 text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-sm px-3 py-2 mb-3" data-testid="dash-assurance-pending">
               <ShieldAlert className="h-4 w-4" /> {data.assurance_pending} high-value cases need Assurance
             </Link>
           )}
@@ -118,7 +115,7 @@ export default function Dashboard() {
         <Panel className="md:col-span-12" eyebrow="Workflow" title="Case status" testId="panel-status">
           <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3">
             {Object.entries(data.status_counts).map(([s, n]) => (
-              <Link key={s} to={`/app/leakages?status=${s}`} className="rounded-lg border border-slate-200 p-3 hover:border-emerald-300 hover:bg-emerald-50/30 transition-colors" data-testid={`status-count-${s}`}>
+              <Link key={s} to={`/app/leakages?status=${s}`} className="border border-border rounded-sm p-3 hover:bg-slate-50" data-testid={`status-count-${s}`}>
                 <StatusChip status={s} /><div className="num text-xl font-bold text-slate-900 mt-2">{n}</div>
               </Link>
             ))}

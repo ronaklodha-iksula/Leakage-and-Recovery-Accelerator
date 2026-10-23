@@ -88,7 +88,7 @@ export default function ActionPanel({ c, onChange }) {
           return (
             <button key={act.a} disabled={!ok} onClick={() => run(act)} data-testid={`action-${act.a}-button`}
               title={ok ? "" : `Your role (${me.role_label}) can't do this — escalate instead`}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${ok ? TONE[act.tone || "default"] : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed"}`}>
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-sm border transition-colors ${ok ? TONE[act.tone || "default"] : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed"}`}>
               {ok ? <act.icon className="h-4 w-4" /> : <Lock className="h-4 w-4" />}{act.label}
             </button>
           );

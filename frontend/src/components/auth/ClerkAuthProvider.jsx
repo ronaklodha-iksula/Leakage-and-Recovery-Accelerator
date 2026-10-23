@@ -14,7 +14,7 @@ const appearance = {
     colorInputForeground: "#0f172a",
     colorBorder: "#e2e8f0",
     fontFamily: "Manrope, sans-serif",
-    borderRadius: "0.5rem",
+    borderRadius: "0.375rem",
   },
   captcha: { theme: "light" },
 };

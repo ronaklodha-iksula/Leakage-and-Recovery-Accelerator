@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,61 +6,68 @@
 
 @layer base {
     :root {
-        --background: 210 20% 98%;
+        --background: 220 14% 97%;
         --foreground: 222 47% 11%;
         --card: 0 0% 100%;
         --card-foreground: 222 47% 11%;
         --popover: 0 0% 100%;
         --popover-foreground: 222 47% 11%;
-        --primary: 160 84% 36%;
+        --primary: 161 94% 30%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 215 25% 95%;
+        --secondary: 220 14% 94%;
         --secondary-foreground: 222 47% 11%;
-        --muted: 214 16% 94%;
-        --muted-foreground: 215 16% 47%;
-        --accent: 210 20% 95%;
+        --muted: 220 14% 94%;
+        --muted-foreground: 215 16% 42%;
+        --accent: 220 14% 94%;
         --accent-foreground: 222 47% 11%;
-        --destructive: 0 84% 60%;
+        --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 100%;
-        --border: 214 20% 89%;
-        --input: 214 20% 89%;
-        --ring: 160 84% 36%;
-        --radius: 0.5rem;
+        --border: 220 13% 88%;
+        --input: 220 13% 85%;
+        --ring: 161 94% 30%;
+        --radius: 0.4rem;
     }
 }
 
 @layer base {
     * { @apply border-border; }
     body {
-        @apply bg-slate-50 text-slate-700;
+        @apply bg-background text-slate-700;
         font-family: "Manrope", sans-serif;
         -webkit-font-smoothing: antialiased;
     }
     h1, h2, h3, h4 { font-family: "Outfit", sans-serif; letter-spacing: -0.02em; @apply text-slate-900; }
-    ::selection { background: rgba(5, 150, 105, 0.18); color: #064e3b; }
+    ::selection { background: rgba(5, 150, 105, 0.2); }
 }
 
 @layer components {
-    .eyebrow { @apply font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500; }
-    .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
-    .panel { @apply rounded-xl border border-slate-200/80 bg-white shadow-sm; }
-    .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-[background-color,box-shadow,transform,color] duration-150 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none; }
-    .btn-primary { @apply btn bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 hover:shadow; }
-    .btn-secondary { @apply btn bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900; }
-    .btn-ghost { @apply btn font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900; }
+    .eyebrow { @apply font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500; }
+    .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+    .panel { @apply rounded-md border border-border bg-white; }
+    .btn { @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none; }
+    .btn-primary { @apply btn bg-emerald-600 text-white font-semibold hover:bg-emerald-700; }
+    .btn-secondary { @apply btn bg-white text-slate-700 border border-border hover:bg-slate-100 hover:text-slate-900; }
+    .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900; }
     .btn-soft { @apply btn bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100; }
-    .btn-ai { @apply btn bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100; }
+    .btn-ai { @apply btn bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100; }
     .btn-warn { @apply btn bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100; }
     .btn-danger { @apply btn bg-white text-rose-600 border border-rose-200 hover:bg-rose-50; }
-    .field { @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 transition-[border-color,box-shadow] duration-150 disabled:bg-slate-50; }
-    .th { @apply bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold text-[11px] uppercase tracking-wider px-4 py-3 text-left whitespace-nowrap; }
-    .tr { @apply border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors duration-150; }
-    .mesh {
-        background-image: radial-gradient(at 12% 8%, rgba(16, 185, 129, 0.14) 0, transparent 45%),
-            radial-gradient(at 88% 0%, rgba(79, 70, 229, 0.12) 0, transparent 45%),
-            radial-gradient(at 60% 100%, rgba(2, 132, 199, 0.08) 0, transparent 50%);
+    .field { @apply w-full rounded-sm border border-input bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600 disabled:bg-slate-50; }
+    .th { @apply eyebrow font-normal border-b border-border px-4 py-3 text-left whitespace-nowrap; }
+    .tr { @apply border-b border-border last:border-0 hover:bg-slate-50 border-l-2 border-l-transparent hover:border-l-emerald-500 transition-colors; }
+    .grain::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.04;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
-    .dots { background-image: radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px); background-size: 22px 22px; }
+    .grid-bg, .mesh, .dots {
+        background-image: linear-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+        background-size: 48px 48px;
+    }
 }
 
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -70,6 +77,6 @@
 .rise-3 { animation-delay: 0.15s; }
 .rise-4 { animation-delay: 0.2s; }
 @keyframes blink { 50% { opacity: 0; } }
-.caret::after { content: "▍"; color: #4f46e5; animation: blink 1s steps(1) infinite; }
+.caret::after { content: "▍"; color: #7c3aed; animation: blink 1s steps(1) infinite; }
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.ticker { animation: ticker 50s linear infinite; }
+.ticker { animation: ticker 40s linear infinite; }

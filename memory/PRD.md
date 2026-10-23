@@ -19,6 +19,7 @@ Analyst, Approver, Assurance, Rule Author, Viewer/CFO (read + approve/dismiss), 
 - 2026-10-23: Core platform — truth layer rules (versioned), detection, CSV/XLSX ingest, case workflow (escalate/assign/approve/dual control/send claim/follow-up/recovery/deny/write-off/reopen), AI drafts, comments, audit, notifications, dashboard, pipeline, assurance, copilot, admin.
 - 2026-10-23: Pending-access fix (owner emails, Check again promotes, sign-out button).
 - 2026-10-23: Light redesign of all screens + Scenario Library page; 5 new scenarios: B2B receivables (short payment, unpaid overdue after 30d grace, unearned early-pay discount, late interest on late/outstanding amounts), AP overpayments & duplicate payments, SaaS seat/price overbilling, payment processing fees, royalty underpayment (incl. minimum guarantee); sample customers/vendors/processor/licensee.
+- 2026-10-23: User preferred the original design; restored the original layout and styling (sharp corners, mono labels, grid texture, left-bar nav, ticker landing) in LIGHT mode. Features unchanged.
 
 ## Backlog
 - P1: Scheduled reminders for expiring windows / overdue receivables (cron); AR aging buckets view; PDF evidence pack

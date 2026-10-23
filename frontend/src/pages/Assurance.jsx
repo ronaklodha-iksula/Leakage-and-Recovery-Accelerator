@@ -4,7 +4,7 @@ import { PageHeader, Panel, StatusChip, Money, Empty, DomainBadge } from "@/comp
 import { fmtDateTime } from "@/lib/format";
 
 const Row = ({ c, extra }) => (
-  <Link to={`/app/leakages/${c.id}`} data-testid={`assurance-row-${c.number}`} className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[90px_1fr_120px_140px] gap-3 items-center py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-lg">
+  <Link to={`/app/leakages/${c.id}`} data-testid={`assurance-row-${c.number}`} className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[90px_1fr_120px_140px] gap-3 items-center py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-sm">
     <span className="num font-semibold text-emerald-700 text-sm">{c.number}</span>
     <div className="min-w-0"><div className="text-sm font-medium text-slate-900 truncate">{c.counterparty_name}</div><DomainBadge domain={c.domain} /></div>
     <Money value={c.leak_amount} className="text-slate-900 text-sm text-right" />
@@ -29,7 +29,7 @@ export default function Assurance() {
       <PageHeader eyebrow="Independent verification" title="Assurance" desc={`Every finding is re-computed independently. Claims ≥ $${t.toLocaleString()} need an Assurance reviewer's confirmation before an Approver can approve them.`} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {kpis.map(([l, v, tone, bg]) => (
-          <div key={l} className="panel p-5" data-testid={`assurance-kpi-${l.split(" ")[0].toLowerCase()}`}><div className="text-xs font-semibold text-slate-500">{l}</div><div className={`num text-3xl font-bold mt-3 inline-block rounded-lg px-2 ${tone} ${bg}`}>{v}</div></div>
+          <div key={l} className="panel p-5" data-testid={`assurance-kpi-${l.split(" ")[0].toLowerCase()}`}><div className="text-xs font-semibold text-slate-500">{l}</div><div className={`num text-3xl font-bold mt-3 inline-block rounded-sm px-2 ${tone} ${bg}`}>{v}</div></div>
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

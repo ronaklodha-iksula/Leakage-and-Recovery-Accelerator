@@ -28,7 +28,7 @@ const Breakdown = ({ c }) => (
       ))}
     </div>
     </div>
-    <div className="flex justify-between items-end mt-5 rounded-lg bg-slate-50 border border-slate-100 p-4">
+    <div className="flex justify-between items-end mt-5">
       <div><div className="eyebrow">Recoverable</div><Money value={c.leak_amount} cur={c.currency} className="text-3xl text-slate-900" /></div>
       <div className="text-right"><div className="eyebrow">Confidence</div><div className="num text-xl font-bold text-emerald-700" data-testid="case-confidence">{Math.round(c.confidence * 100)}%</div></div>
     </div>
@@ -69,7 +69,7 @@ const AssuranceBox = ({ c, onChange }) => {
         <div className="flex justify-between"><span className="text-slate-500">Automated re-check</span><span className={`font-semibold ${a.auto === "CONFIRM" ? "text-emerald-700" : "text-rose-600"}`} data-testid="assurance-auto">{a.auto === "CONFIRM" ? "Matches" : "Mismatch"}</span></div>
         <div className="flex justify-between"><span className="text-slate-500">Reviewer verdict</span><span data-testid="assurance-verdict" className={`font-semibold ${a.verdict === "CONFIRM" ? "text-emerald-700" : a.verdict ? "text-rose-600" : "text-slate-400"}`}>{a.verdict ? `${a.verdict === "CONFIRM" ? "Confirmed" : "Disagreed"} · ${a.by}` : "Not reviewed"}</span></div>
         {a.note && <div className="text-xs text-slate-500 italic">“{a.note}”</div>}
-        {c.needs_dual_control && <div className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-2 mt-2">Dual control: claims ≥ {money(c.dual_approval_threshold)} need Assurance confirmation before approval.</div>}
+        {c.needs_dual_control && <div className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-sm px-2.5 py-2 mt-2">Dual control: claims ≥ {money(c.dual_approval_threshold)} need Assurance confirmation before approval.</div>}
       </div>
       {can("adjudicate") && (
         <div className="mt-4 space-y-2">
@@ -93,16 +93,16 @@ export default function CaseDetail() {
   return (
     <div>
       <Link to="/app/leakages" className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 mb-4" data-testid="case-back-link"><ArrowLeft className="h-3 w-3" />Leakages</Link>
-      <div className="panel p-5 sm:p-6 mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5 rise">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 rise">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap"><span className="num font-semibold text-emerald-700 text-sm" data-testid="case-number">{c.number}</span><StatusChip status={c.status} testId="case-status" /><DomainBadge domain={c.domain} /></div>
-          <h1 className="text-2xl sm:text-3xl font-bold mt-2">{LEAK_TYPES[c.leak_type] || c.leak_type} · {c.counterparty_name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-semibold mt-2">{LEAK_TYPES[c.leak_type] || c.leak_type} · {c.counterparty_name}</h1>
           <div className="text-sm text-slate-500 mt-1"><span className="num">{c.ref}</span> · {fmtDate(c.txn_date)} · {DOMAINS[c.domain]?.label}</div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-2.5"><div className="eyebrow text-amber-700/70">Leakage</div><Money value={c.leak_amount} cur={c.currency} className="text-xl text-amber-800" /></div>
-          <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-2.5"><div className="eyebrow text-emerald-700/70">Recovered</div><Money value={c.recovered_amount} cur={c.currency} className="text-xl text-emerald-800" /></div>
-          <div className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5"><div className="eyebrow">Window</div><div className={`num text-xl font-semibold flex items-center gap-1 ${d < 0 ? "text-rose-600" : d < 15 ? "text-amber-600" : "text-slate-900"}`} data-testid="case-window"><Clock className="h-4 w-4" />{d < 0 ? "Expired" : `${d}d`}</div></div>
+        <div className="flex flex-wrap gap-6">
+          <div><div className="eyebrow">Leakage</div><Money value={c.leak_amount} cur={c.currency} className="text-2xl text-rose-600" /></div>
+          <div><div className="eyebrow">Recovered</div><Money value={c.recovered_amount} cur={c.currency} className="text-2xl text-emerald-600" /></div>
+          <div><div className="eyebrow">Window</div><div className={`num text-2xl flex items-center gap-1 ${d < 0 ? "text-rose-600" : d < 15 ? "text-amber-600" : "text-slate-900"}`} data-testid="case-window"><Clock className="h-4 w-4" />{d < 0 ? "Expired" : `${d}d`}</div></div>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
