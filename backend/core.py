@@ -96,6 +96,11 @@ async def current_member(user: dict = Depends(require_user)) -> dict:
             {"$setOnInsert": {"user_id": uid, "role": role, "created_at": now_iso()},
              "$set": {"email": prof["email"], "name": prof["name"]}},
             upsert=True, projection={"_id": 0}, return_document=ReturnDocument.AFTER)
+    if member.get("role") == "pending":
+        prof = await run_in_threadpool(_clerk_profile, uid)
+        if prof["is_admin"]:
+            await db.users.update_one({"user_id": uid, "role": "pending"}, {"$set": {"role": "admin"}})
+            member = {**member, "role": "admin"}
     if member.get("env") != ENV:
         await db.users.update_one({"user_id": uid}, {"$set": {"env": ENV}})
     return {**member, "env": ENV, "role": effective_role(member["role"])}
