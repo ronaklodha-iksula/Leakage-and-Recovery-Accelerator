@@ -63,6 +63,18 @@ async def update_cp(cp_id: str, body: CounterpartyIn, member: dict = Depends(req
     return await db.counterparties.find_one({"id": cp_id}, {"_id": 0})
 
 
+@router.delete("/counterparties/{cp_id}")
+async def delete_cp(cp_id: str, member: dict = Depends(require_cap("manage_settings"))):
+    if await db.cases.count_documents({"counterparty_id": cp_id}) or await db.transactions.count_documents({"counterparty_id": cp_id}):
+        raise HTTPException(409, "This counterparty has transactions or cases and can't be deleted")
+    r = await db.counterparties.delete_one({"id": cp_id})
+    if not r.deleted_count:
+        raise HTTPException(404, "Not found")
+    await db.rules.delete_many({"counterparty_id": cp_id})
+    await audit(member, "counterparty.deleted", "counterparty", cp_id, "")
+    return {"ok": True}
+
+
 # ---------- truth layer (contract rules) ----------
 class RuleIn(BaseModel):
     name: str

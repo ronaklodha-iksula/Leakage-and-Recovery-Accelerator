@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -84,5 +86,6 @@ async def audit_log(entity: str = "", actor: str = "", q: str = "", limit: int =
     if actor:
         f["actor_id"] = actor
     if q:
-        f["$or"] = [{"action": {"$regex": q, "$options": "i"}}, {"detail": {"$regex": q, "$options": "i"}}]
+        rq = re.escape(q)
+        f["$or"] = [{"action": {"$regex": rq, "$options": "i"}}, {"detail": {"$regex": rq, "$options": "i"}}]
     return await db.audit.find(f, {"_id": 0}).sort("ts", -1).to_list(limit)

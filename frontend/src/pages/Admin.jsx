@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -15,7 +15,7 @@ const PERMS = [
   ["Approver", "Approve or dismiss, send claims & follow-ups, record recoveries, write off"],
   ["Assurance", "Independent confirm/disagree; required for claims above the dual-control threshold"],
   ["Rule Author", "Create, version and publish contract rules (truth layer)"],
-  ["Viewer / CFO", "Read everything, dashboards, Copilot, comment; receives escalations"],
+  ["Viewer / CFO", "Read everything, dashboards, Copilot, comment; receives escalations and can approve or dismiss claims"],
   ["Admin", "Everything above + team roles, counterparties and settings"],
 ];
 
@@ -82,6 +82,11 @@ const CPDialog = ({ cp, onClose, onSaved }) => {
 const Counterparties = () => {
   const { data, reload } = useData("/counterparties");
   const [edit, setEdit] = useState(null);
+  const api = useApi();
+  const remove = async (c) => {
+    if (!window.confirm(`Delete ${c.name}?`)) return;
+    try { await api.delete(`/counterparties/${c.id}`); toast.success("Deleted"); reload(); } catch (e) { toast.error(errMsg(e)); }
+  };
   return (
     <Panel eyebrow="Partners" title="Counterparties & dispute contacts" testId="counterparties-panel"
       action={<button onClick={() => setEdit({})} data-testid="new-counterparty-button" className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-sm bg-emerald-500 text-[#0b0f19] font-semibold hover:bg-emerald-400"><Plus className="h-4 w-4" />Add</button>}>
@@ -89,7 +94,10 @@ const Counterparties = () => {
         {(data || []).map((c) => (
           <div key={c.id} className="flex items-center justify-between gap-3 py-3" data-testid={`cp-row-${c.id}`}>
             <div className="min-w-0"><div className="text-sm text-white">{c.name} <span className="text-[10px] font-mono text-slate-500 ml-1">{c.type}</span></div><div className="text-xs text-slate-400 num truncate">{c.contact_name} · {c.contact_email || "no email"}</div></div>
-            <button onClick={() => setEdit(c)} data-testid={`cp-edit-${c.id}`} className="p-2 rounded-sm border border-border hover:bg-slate-800 hover:text-white"><Pencil className="h-3.5 w-3.5" /></button>
+            <div className="flex gap-2">
+              <button onClick={() => setEdit(c)} data-testid={`cp-edit-${c.id}`} className="p-2 rounded-sm border border-border hover:bg-slate-800 hover:text-white"><Pencil className="h-3.5 w-3.5" /></button>
+              <button onClick={() => remove(c)} data-testid={`cp-delete-${c.id}`} className="p-2 rounded-sm border border-border text-rose-300 hover:bg-rose-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
+            </div>
           </div>
         ))}
       </div>

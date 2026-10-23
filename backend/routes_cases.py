@@ -1,5 +1,6 @@
 import csv
 import io
+import re
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -51,8 +52,9 @@ async def list_cases(status: str = "", domain: str = "", counterparty_id: str = 
     elif assignee == "unassigned":
         f["assignee_id"] = None
     if q:
-        f["$or"] = [{"number": {"$regex": q, "$options": "i"}}, {"ref": {"$regex": q, "$options": "i"}},
-                    {"counterparty_name": {"$regex": q, "$options": "i"}}]
+        rq = re.escape(q)
+        f["$or"] = [{"number": {"$regex": rq, "$options": "i"}}, {"ref": {"$regex": rq, "$options": "i"}},
+                    {"counterparty_name": {"$regex": rq, "$options": "i"}}]
     if expiring:
         s = await get_settings()
         from datetime import date, timedelta
@@ -140,6 +142,8 @@ async def case_action(case_id: str, body: ActionIn, member: dict = Depends(requi
         s = await get_settings()
         if c["assurance"].get("verdict") == "DISAGREE":
             raise HTTPException(409, "Assurance disagreed with this finding — resolve before approving")
+        if c["assurance"].get("auto") != "CONFIRM" and c["assurance"].get("verdict") != "CONFIRM":
+            raise HTTPException(409, "Automated re-check disagrees — Assurance must confirm before approval")
         if c["leak_amount"] >= s["dual_approval_threshold"] and c["assurance"].get("verdict") != "CONFIRM":
             raise HTTPException(409, f"Claims ≥ {s['dual_approval_threshold']:,.0f} need Assurance confirmation first")
     if body.action == "dismiss" and not body.note.strip():
@@ -147,6 +151,9 @@ async def case_action(case_id: str, body: ActionIn, member: dict = Depends(requi
     if body.action == "record_recovery":
         if not body.amount or body.amount <= 0:
             raise HTTPException(400, "Enter the amount recovered")
+        remaining = round(c["leak_amount"] - c.get("recovered_amount", 0), 2)
+        if body.amount > remaining + 0.01:
+            raise HTTPException(400, f"Amount exceeds the outstanding {remaining:,.2f}")
         total = round(c.get("recovered_amount", 0) + body.amount, 2)
         upd["recovered_amount"] = total
         to = "RECOVERED" if total >= c["leak_amount"] - 0.01 else "PARTIALLY_RECOVERED"
@@ -206,7 +213,13 @@ async def send_claim(case_id: str, body: SendIn, member: dict = Depends(require_
         raise HTTPException(400, "This counterparty has no dispute contact email — ask an Admin to add it")
     subject = c["draft"]["subject"] if body.kind == "claim" else f"Follow-up: {c['draft']['subject']}"
     html = text_to_email_html(c["draft"]["body"], f"Case {c['number']} · Ref {c['ref']}.")
-    email_id = await send_email(to=cp["contact_email"], subject=subject, html=html, reply_to=member.get("email"))
+    lock = await db.cases.update_one({"id": case_id, "sending": {"$ne": True}}, {"$set": {"sending": True}})
+    if not lock.modified_count:
+        raise HTTPException(409, "This email is already being sent")
+    try:
+        email_id = await send_email(to=cp["contact_email"], subject=subject, html=html, reply_to=member.get("email"))
+    finally:
+        await db.cases.update_one({"id": case_id}, {"$set": {"sending": False}})
     log = {"id": new_id("em_"), "kind": body.kind, "to": cp["contact_email"], "subject": subject,
            "by": member.get("name"), "ts": now_iso(), "provider_id": email_id}
     upd = {"updated_at": now_iso()}

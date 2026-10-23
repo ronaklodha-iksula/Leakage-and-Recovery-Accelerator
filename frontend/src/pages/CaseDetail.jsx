@@ -19,7 +19,7 @@ const Breakdown = ({ c }) => (
           <div className="py-2.5 border-b border-border text-slate-300">{l.label}</div>
           <div className="py-2.5 border-b border-border num text-slate-400 text-right">{money(l.expected, c.currency)}</div>
           <div className="py-2.5 border-b border-border num text-slate-200 text-right">{money(l.actual, c.currency)}</div>
-          <div className={`py-2.5 border-b border-border num text-right ${l.variance > 0 ? "text-rose-300" : "text-slate-500"}`}>{l.variance > 0 ? "+" : ""}{money(l.variance, c.currency)}</div>
+          <div className={`py-2.5 border-b border-border num text-right ${l.variance > 0 || (c.leak_type === "REBATE_SHORTFALL" && l.variance < 0) ? "text-rose-300" : "text-slate-500"}`}>{l.variance > 0 ? "+" : ""}{money(l.variance, c.currency)}</div>
         </div>
       ))}
     </div>
@@ -103,7 +103,7 @@ export default function CaseDetail() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         <div className="lg:col-span-5 space-y-4"><Breakdown c={c} /><Txn t={c.transaction} /></div>
-        <div className="lg:col-span-4 space-y-4"><Clause c={c} /><AssuranceBox c={c} onChange={setData} /><EmailDraft c={c} onChange={update} /></div>
+        <div className="lg:col-span-4 space-y-4"><Clause c={c} /><AssuranceBox c={c} onChange={update} /><EmailDraft c={c} onChange={update} /></div>
         <div className="lg:col-span-3 space-y-4"><ActionPanel c={c} onChange={update} /><Activity c={c} onChange={update} /></div>
       </div>
     </div>

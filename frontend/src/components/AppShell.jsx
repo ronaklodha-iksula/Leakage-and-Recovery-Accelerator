@@ -50,14 +50,17 @@ const Bellbox = () => {
   const api = useApi();
   const nav = useNavigate();
   const { data, reload } = useData("/notifications");
+  const [isOpen, setIsOpen] = useState(false);
   const open = async (o) => {
+    setIsOpen(o);
+    if (o) reload();
     if (!o && data?.unread) {
       await api.post("/notifications/read-all");
       reload();
     }
   };
   return (
-    <Popover onOpenChange={open}>
+    <Popover open={isOpen} onOpenChange={open}>
       <PopoverTrigger asChild>
         <button data-testid="notifications-bell" className="relative h-9 w-9 grid place-items-center rounded-sm border border-border hover:bg-slate-800 hover:text-white text-slate-300">
           <Bell className="h-4 w-4" />
@@ -69,7 +72,7 @@ const Bellbox = () => {
         <div className="max-h-80 overflow-auto">
           {!data?.items?.length && <div className="p-4 text-sm text-slate-500">You're all caught up.</div>}
           {data?.items?.map((n) => (
-            <button key={n.id} onClick={() => nav(n.link)} data-testid={`notification-${n.id}`} className="w-full text-left px-4 py-3 border-b border-border hover:bg-slate-800/60">
+            <button key={n.id} onClick={() => { open(false); nav(n.link); }} data-testid={`notification-${n.id}`} className="w-full text-left px-4 py-3 border-b border-border hover:bg-slate-800/60">
               <div className="text-sm text-white flex items-center gap-2">{!n.read && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />}{n.title}</div>
               <div className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.body}</div>
               <div className="text-[10px] text-slate-500 mt-1 num">{fmtDateTime(n.ts)}</div>

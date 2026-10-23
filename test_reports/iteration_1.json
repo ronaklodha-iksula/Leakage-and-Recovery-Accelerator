@@ -1,0 +1,47 @@
+{
+  "summary": "Full backend (pytest, 21 tests across all 6 roles via Clerk JWTs) + frontend (Playwright with Clerk sign-in tickets for analyst, approver, assurance, rule_author, viewer_cfo, admin, pending) testing of the Leakage & Recovery platform. Working: auth (401 without token, session kept after refresh, sign-out goes to /sign-in, pending user sees the 'Waiting for access' page and gets 403 on data APIs), server-side role caps, rule draft/edit/publish/retire versioning, AI term extraction, CSV ingest with auto-detection, dedupe on re-upload, 422 for missing columns, list filters and CSV export, escalation that notifies the approver, dual control (409 before Assurance CONFIRM), AI draft streaming, save draft, sending a claim to delivered@resend.dev, partial and full recovery, denied/write-off/reopen/dismiss (dismiss needs a note), kanban pipeline, Assurance page, Copilot streaming with history and clear, audit log, and the admin pages (last-admin 409, roles, counterparties, settings). Found 1 backend bug (500 on regex special characters in search). Found 2 frontend bugs: (a) the notification popover overlay, reported for the main agent; (b) the Assurance verdict wiped case detail panels, which I fixed and re-verified.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/cases?q=(  and GET /api/audit?q=(", "issue": "Returns 500. User search text goes straight into a Mongo $regex without escaping, so an invalid pattern raises OperationFailure. Fix: wrap q in re.escape() in routes_cases.list_cases and routes_admin.audit_log."},
+      {"endpoint": "POST /api/cases/{id}/action record_recovery", "issue": "The amount is not capped at the remaining leak amount, so recovered_amount can exceed leak_amount and inflate KPIs and the recovery rate."},
+      {"endpoint": "Counterparties", "issue": "There is no DELETE /api/counterparties/{id}, so counterparty CRUD is incomplete and the TEST_ counterparty cannot be removed through the API."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AppShell notifications popover", "issue": "Clicking a notification navigates to the case but the Radix popover stays open. It covers the case Actions panel, so the Approve click is intercepted until the user presses Esc or clicks outside. The unread badge also stays the same. Fix: make the Popover controlled and call setOpen(false) in the notification onClick.", "selector": "[data-testid^='notification-']", "priority": "MEDIUM"},
+      {"component": "CaseDetail AssuranceBox (FIXED by testing agent)", "issue": "onChange={setData} replaced the case with the POST /assurance response. That response has no transaction, counterparty, rule or history, so after Confirm/Disagree the Transaction panel went blank, the recipient showed 'No contact set' and the clause disappeared. Changed it to onChange={update} (reload) and re-verified.", "selector": "[data-testid='assurance-confirm-button']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Contracts rule editor", "issues": ["Effective from/to use the browser's native date picker (input type=date) instead of the shadcn Calendar/Popover"]},
+      {"screen": "Leakages", "issues": ["Search only runs on Enter. There is no search button or debounce, so typing gives no feedback."]},
+      {"screen": "Control Tower 'Dispute windows closing'", "issues": ["Lists windows that have already expired ('expired 69d ago') next to ones closing soon. Consider separating expired from closing-soon."]},
+      {"screen": "Data Ingestion history", "issues": ["Seeded sample batches show '—' in the Leaks column because detection ran globally at seed time"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_leakage_api.py", "/app/backend/tests/conftest.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Escape regex input (re.escape) for q in /api/cases and /api/audit (currently 500)",
+    "Close the notifications popover on item click (controlled Popover) and refresh the unread count",
+    "Decide on viewer_cfo: it is in ESCALATION_ROLES and gets escalations, but has no approve/send_claim cap, so a case escalated to the CFO is stuck. Either give the CFO approve or remove the CFO from escalation targets.",
+    "Cap record_recovery amount at the remaining amount (leak_amount - recovered_amount)",
+    "Add DELETE (or archive) for counterparties if full CRUD is required",
+    "Replace native date inputs in the rule editor with the shadcn Calendar"
+  ],
+  "critical_code_review_comments": [
+    "core._clerk_profile uses blocking requests.get inside async current_member. It blocks the event loop on first-seen users. Use httpx.AsyncClient or run_in_threadpool.",
+    "services.insert_transactions / run_detection do per-row find_one/insert/update (N+1). A 10MB upload means thousands of sequential round-trips within one request. Use bulk_write and batched lookups, or a background task.",
+    "send_claim is not idempotent: two concurrent clicks can send two emails before the status changes. Use a conditional update (status APPROVED -> SENDING) before sending.",
+    "Approve only blocks on reviewer DISAGREE or a missing CONFIRM at or above the threshold. Cases where the automated re-check is DISAGREE (assurance.auto) below the threshold can still be approved.",
+    "routes_cases imports CAPS inside the handler (from core import CAPS) and declares an unused P='_id' in several modules. This is cosmetic."
+  ],
+  "updated_files": ["/app/frontend/src/pages/CaseDetail.jsx (AssuranceBox onChange setData -> update)", "/app/backend/tests/test_leakage_api.py (new)", "/app/backend/tests/conftest.py (new)"],
+  "success_rate": {"backend": "95% (20/21; regex search 500)", "frontend": "~92% (all flows work; notification popover overlay bug; assurance panel bug fixed)"},
+  "seed_data_creation": "Created via tests (all TEST_ prefixed, please clean up): counterparty cp_a5087eae1f 'TEST_Freight_001ea6' (contact delivered@resend.dev; each pytest run creates another TEST_Freight_<tag> counterparty). Rules for it: 'TEST_rule v1 edited' (RETIRED v1), 'TEST_rule v2' (RETIRED v2), 'TEST_UI rule v3' (PUBLISHED v3). Batches TEST_frt.csv (x2, the 2nd fully skipped), TEST_ui.csv, TEST_ui2.csv, TEST_ui3.csv. Cases LK-1049..LK-1055 (refs TEST_FRT-001ea6-1/2, TEST_UI-1..5) plus their transactions, comments, notifications and audit events. Claim emails sent only to delivered@resend.dev. Sample counterparties were NOT modified. Settings were restored to their original values. viewercfo+clerk_test was set to pending temporarily and restored to viewer_cfo.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "/app/memory/test_credentials.md is valid. All 6 +clerk_test role users exist and work. API JWTs come from scripts/clerk_test_users.py <role> (note: running it re-sets each test user's role in the DB). UI sign-in uses scripts/clerk_ticket.py <role> (the pending role works when a test user is set to pending).",
+  "context_for_next_testing_agent": "Run: cd /app/backend/tests && python3 -m pytest test_leakage_api.py -v. Tokens are cached in /tmp/tok_<role>.txt (regenerated after about 50 min). Each run creates a new TEST_Freight_<tag> counterparty and freight cases, so it does not touch sample data. test_search_regex_special_chars should pass once re.escape is added. Sign-out is through the Clerk UserButton (.cl-userButtonTrigger -> 'Sign out')."
+}
