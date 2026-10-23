@@ -1,0 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 222 39% 7%;
+        --foreground: 210 20% 98%;
+        --card: 221 39% 10%;
+        --card-foreground: 210 20% 98%;
+        --popover: 221 39% 10%;
+        --popover-foreground: 210 20% 98%;
+        --primary: 160 84% 39%;
+        --primary-foreground: 222 47% 7%;
+        --secondary: 217 33% 15%;
+        --secondary-foreground: 210 20% 98%;
+        --muted: 217 33% 14%;
+        --muted-foreground: 218 11% 65%;
+        --accent: 217 33% 17%;
+        --accent-foreground: 210 20% 98%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 215 28% 17%;
+        --input: 215 28% 20%;
+        --ring: 160 84% 39%;
+        --radius: 0.4rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family: "Manrope", sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4 {
+        font-family: "Outfit", sans-serif;
+        letter-spacing: -0.02em;
+    }
+    ::selection {
+        background: rgba(16, 185, 129, 0.35);
+    }
+}
+
+@layer components {
+    .eyebrow {
+        @apply font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400;
+    }
+    .num {
+        font-family: "JetBrains Mono", monospace;
+        font-variant-numeric: tabular-nums;
+    }
+    .panel {
+        @apply rounded-md border border-border bg-card;
+    }
+    .grain::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .grid-bg {
+        background-image: linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+        background-size: 48px 48px;
+    }
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise 0.45s ease both; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.1s; }
+.rise-3 { animation-delay: 0.15s; }
+.rise-4 { animation-delay: 0.2s; }
+
+@keyframes blink { 50% { opacity: 0; } }
+.caret::after { content: "▍"; color: #a78bfa; animation: blink 1s steps(1) infinite; }
+
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker { animation: ticker 40s linear infinite; }
