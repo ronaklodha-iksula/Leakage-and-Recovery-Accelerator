@@ -1,4 +1,5 @@
 # Leakage & Recovery API regression: auth, role caps, rules, ingest, case workflow, admin
+import os
 import io
 import json
 import time
@@ -137,7 +138,7 @@ def test_search_regex_special_chars(c):
 
 # ---------- workflow ----------
 def test_escalate_approve_flow(c):
-    team = {m["role"]: m["user_id"] for m in c["admin"].get(B + "/api/team").json()}
+    team = {m["role"]: m["user_id"] for m in c["admin"].get(B + "/api/team").json() if "clerk_test" in (m.get("email") or "")}
     STATE["team"] = team
     cid = STATE["small"]
     # escalating to an analyst should be rejected
@@ -229,10 +230,14 @@ def test_admin_roles_settings(c):
     team = STATE["team"]
     r = c["admin"].patch(B + f"/api/users/{team['admin']}/role", json={"role": "analyst"})
     # Only one admin in preview env? -> expect 409; if more admins exist, revert
+    # Multiple admins (e.g. real owner) -> demotion allowed (200); revert immediately. Single admin -> 409.
     if r.status_code == 200:
-        c["admin"].patch(B + f"/api/users/{team['admin']}/role", json={"role": "admin"})
-        pytest.fail("Admin demoted though expected 409 (maybe multiple admins exist)")
-    assert r.status_code == 409
+        # demoted admin can no longer re-promote itself via API -> restore directly in DB
+        from pymongo import MongoClient
+        from dotenv import load_dotenv; load_dotenv("/app/backend/.env")
+        MongoClient(os.environ["MONGO_URL"])[os.environ["DB_NAME"]].users.update_one({"user_id": team["admin"]}, {"$set": {"role": "admin"}})
+    else:
+        assert r.status_code == 409
     assert c["approver"].patch(B + f"/api/users/{team['analyst']}/role", json={"role": "admin"}).status_code == 403
     s = c["admin"].get(B + "/api/settings").json()
     s2 = {k: s[k] for k in ["dual_approval_threshold", "expiring_window_days", "company_name", "auto_detect_on_upload"]}

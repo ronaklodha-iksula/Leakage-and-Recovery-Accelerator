@@ -1,0 +1,33 @@
+{
+  "summary": "Tested the fix for users stuck on the 'Waiting for access' page, end to end (UI + API). All pending-flow features PASS: (1) ADMIN_EMAIL = 'ronaklodhaps110@gmail.com,ronak.l@iksula.com' (verified via dotenv; .env not displayed). (2) A new verified Clerk user (ownertest+clerk_test) signed in with a ticket and saw pending-approval. ownertest was then temporarily added to ADMIN_EMAIL and the backend restarted. Clicking pending-refresh-button took the user into the app with role-badge ADMIN and the Team & Settings nav visible; the DB role was saved as admin. ADMIN_EMAIL was then restored byte-identical and the backend restarted. (3) A non-admin pending user stayed pending after Check again and after a reload. /api/dashboard returned 403 to the browser token. (4) pending-signout-button signed the user out and landed on /sign-in; /app then redirected to /sign-in. (5) The admin changed role-select-pendingtest to Analyst ('Role updated' toast). The user clicked Check again, got the ANALYST badge, and kept it after reload. (6) Regression: admin and analyst log in through the UI, and the session survives a refresh. No token gives 401. Pytest: 24/27 pass. The 3 failures all come from the email provider returning 429 rate_limited after repeated suite runs (send_claim and the 2 tests that depend on it). They are not caused by this fix, and the same tests passed in earlier runs this session.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/cases/{id}/send (services.send_email)", "issue": "When the email provider answers 429 {code: rate_limited}, the backend raises HTTPException 502. The ingress replaces the 502 with its own HTML error page, so the frontend gets no JSON detail. Map rate_limited to 429 or 503 with a friendly message such as 'Email rate limit reached, try again in a minute'."},
+      {"endpoint": "core.current_member (pending re-check)", "issue": "Every request from a pending user makes a synchronous Clerk API call. If Clerk fails, raise_for_status gives a bare 500 for that request. This is acceptable because the next request retries, but it adds latency and could be cached for a short time."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_pending_access.py", "/app/backend/tests/test_leakage_api.py", "/app/test_reports/pytest/pytest_results_iter2.xml", "/app/scripts/clerk_pending_helper.py"],
+  "action_items": [
+    "IMPORTANT (owner): ronak.l@iksula.com is now role viewer_cfo, not pending. The audit log shows ronaklodhaps110 set it at 09:22:38, which was not the tester. The auto-promotion only applies to PENDING users, so this account will NOT become admin even though it is in ADMIN_EMAIL. If the owner wants admin, set it from Team & roles. Consider promoting any non-admin whose verified email is in ADMIN_EMAIL, or document that ADMIN_EMAIL only promotes pending users.",
+    "Map the email-provider 429 rate_limited error to 429/503 with a clear detail instead of 502 in services.send_email."
+  ],
+  "critical_code_review_comments": [
+    "core.current_member pending block is correct: it only promotes when the email is VERIFIED and in ADMIN_EMAIL, and the update is conditional on role=='pending', so it is race-safe.",
+    "test_leakage_api.py built the role->user_id map from /api/team without filtering, so the real admin (ronaklodhaps110) was picked as 'admin' and DEMOTED by test_admin_roles_settings. The tester fixed this by filtering on clerk_test emails and restored ronaklodhaps110 to admin in the DB. The role is now admin again (audit shows the transient change at 09:24-09:25).",
+    "routes_admin set_role: once an admin demotes itself it can no longer re-promote itself (expected). The 'keep at least one admin' 409 only applies when there is a single admin."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pending_access.py (new: pending flow API regression with self-cleanup)",
+    "/app/backend/tests/test_leakage_api.py (team map filtered to clerk_test users; demotion test now tolerates multiple admins and restores the role in the DB; added import os)",
+    "/app/scripts/clerk_pending_helper.py (new helper: create/ticket/jwt/role/delete for temporary Clerk users)"
+  ],
+  "success_rate": {"backend": "89% (24/27; the 3 failures are email-provider rate limit 429)", "frontend": "100%"},
+  "test_credentials": "/app/memory/test_credentials.md (unchanged; role test users intact)",
+  "seed_data_creation": "Temporary Clerk+DB users ownertest+clerk_test, pendingtest+clerk_test and test_pendingreg+clerk_test were created and then DELETED from Clerk and db.users. ADMIN_EMAIL was restored exactly. The tests also created cases and audit entries, the same way iteration 1 did.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Real users: ronaklodhaps110@gmail.com=admin, ronak.l@iksula.com=viewer_cfo (set by the owner; do not touch). The backend hot-reloads when files under backend/tests change, so avoid editing tests during a run. To test ADMIN_EMAIL promotion without reading .env, use sed on the ADMIN_EMAIL line only, then supervisorctl restart backend. Browser automation runs in the same container, so subprocess calls work from inside scripts. The send_claim tests may fail with a 502 if the email provider is rate limiting; wait and rerun.",
+  "rca of the issue": "The owner signed up as ronak.l@iksula.com, which was not in ADMIN_EMAIL, so the account was created as 'pending'. The old code only checked ADMIN_EMAIL on first insert, so nothing could ever promote the account. Fix: add the email to ADMIN_EMAIL, and have current_member re-check pending users against Clerk on every request. Verified working."
+}

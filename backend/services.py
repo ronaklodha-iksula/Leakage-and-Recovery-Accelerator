@@ -218,6 +218,8 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: str | None =
         if code in ("insufficient_credits", "integration_disabled", "daily_limit_reached"):
             logger.warning(f"Email paused: {code} ({e.response.status_code}): {e.response.text}")
             raise HTTPException(status_code=503, detail="Email is temporarily unavailable")
+        if code == "rate_limited" or e.response.status_code == 429:
+            raise HTTPException(status_code=429, detail="Email rate limit reached — try again in a minute")
         if code == "undeliverable_recipient":
             raise HTTPException(status_code=422, detail=f"Recipient {to} looks undeliverable — update the dispute contact email in Team & Settings → Counterparties")
         logger.error(f"Email send failed: {e.response.status_code} {e.response.text}")
