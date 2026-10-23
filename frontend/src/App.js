@@ -17,14 +17,15 @@ import Assurance from "@/pages/Assurance";
 import Copilot from "@/pages/Copilot";
 import AuditLog from "@/pages/AuditLog";
 import Admin from "@/pages/Admin";
+import Scenarios from "@/pages/Scenarios";
 
 const AuthPage = ({ children }) => (
-  <div className="min-h-screen grid lg:grid-cols-2">
-    <div className="hidden lg:flex relative grain grid-bg flex-col justify-between p-12 border-r border-border bg-[#0d1220]">
-      <div className="eyebrow text-emerald-400">L&amp;R Accelerator</div>
+  <div className="min-h-screen grid lg:grid-cols-2 bg-slate-50">
+    <div className="hidden lg:flex relative mesh dots flex-col justify-between p-12 border-r border-slate-200 bg-white">
+      <div className="flex items-center gap-2.5"><div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-extrabold text-xs font-mono">LR</div><span className="font-bold text-slate-900" style={{ fontFamily: "Outfit" }}>L&amp;R Accelerator</span></div>
       <div>
-        <h2 className="text-4xl font-semibold text-white max-w-md">Every fee, deduction and invoice — checked against what you actually signed.</h2>
-        <p className="text-slate-400 mt-4 max-w-md text-sm">Detect leakage, route it to the right approver, and recover it with an evidence-backed claim.</p>
+        <h2 className="text-4xl font-bold max-w-md">Every fee, deduction, invoice and payment — checked against what was agreed.</h2>
+        <p className="text-slate-500 mt-4 max-w-md text-sm">Detect leakage across partners, suppliers and customers, route it to the right approver, and recover it with an evidence-backed claim.</p>
       </div>
       <div className="text-xs text-slate-500">Role-based access · Dual control · Immutable audit trail</div>
     </div>
@@ -72,11 +73,12 @@ function App() {
               <Route path="copilot" element={<Copilot />} />
               <Route path="audit" element={<AuditLog />} />
               <Route path="admin" element={<Admin />} />
+              <Route path="scenarios" element={<Scenarios />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <Toaster theme="dark" position="top-right" />
+        <Toaster theme="light" position="top-right" richColors />
       </ClerkAuthProvider>
     </BrowserRouter>
   );

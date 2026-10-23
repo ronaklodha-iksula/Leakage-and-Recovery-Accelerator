@@ -19,10 +19,37 @@ CPS = [
      "contact_email": "rebates@example.com", "currency": "USD", "portal_url": ""},
     {"id": "cp_expresscomm", "name": "ExpressComm Logistics", "type": "CARRIER", "contact_name": "Freight Billing Disputes",
      "contact_email": "freight-billing@example.com", "currency": "USD", "portal_url": ""},
+    {"id": "cp_northwind", "name": "Northwind Retail Group", "type": "CUSTOMER", "contact_name": "Accounts Payable",
+     "contact_email": "ap@example.com", "currency": "USD", "portal_url": ""},
+    {"id": "cp_brightline", "name": "Brightline Distributors", "type": "CUSTOMER", "contact_name": "Finance – Payables",
+     "contact_email": "payables@example.com", "currency": "USD", "portal_url": ""},
+    {"id": "cp_apex", "name": "Apex Packaging Co", "type": "VENDOR", "contact_name": "Accounts Receivable",
+     "contact_email": "billing@example.com", "currency": "USD", "portal_url": ""},
+    {"id": "cp_cloudsuite", "name": "CloudSuite CRM", "type": "SAAS_VENDOR", "contact_name": "Billing Support",
+     "contact_email": "billing-support@example.com", "currency": "USD", "portal_url": ""},
+    {"id": "cp_paystream", "name": "PayStream Merchant Services", "type": "PROCESSOR", "contact_name": "Merchant Pricing",
+     "contact_email": "merchant-pricing@example.com", "currency": "USD", "portal_url": ""},
+    {"id": "cp_lumen", "name": "Lumen Brands (Licensee)", "type": "LICENSEE", "contact_name": "Royalty Reporting",
+     "contact_email": "royalties@example.com", "currency": "USD", "portal_url": ""},
 ]
+ORIGINAL_CPS = ["cp_amazon", "cp_walmart", "cp_target", "cp_midwest", "cp_valuestores", "cp_expresscomm"]
 PRICES = {"PVC-PIPE-2IN": 4.10, "COPPER-FIT-34": 2.85, "DRYWALL-SHT-4X8": 11.40, "CEMENT-BAG-50": 9.75}
 REF_PCT = {"Kitchen": 15.0, "Sports": 15.0, "Home": 15.0, "Electronics": 8.0, "Beauty": 8.0, "default": 15.0}
 RULES = [
+    ("rule_nwd", "cp_northwind", "AR_RECEIVABLE", "Northwind Master Supply Agreement – Payment Terms", 1, "PUBLISHED", f"{Y}-01-01", f"{Y}-12-31",
+     {"payment_terms_days": 30, "early_pay_discount_pct": 2.0, "discount_days": 10, "late_interest_pct_per_month": 1.5,
+      "tolerance_amount": 5.0, "dispute_window_days": 365}),
+    ("rule_bld", "cp_brightline", "AR_RECEIVABLE", "Brightline Distribution Agreement – Net 45", 1, "PUBLISHED", f"{Y}-01-01", f"{Y}-12-31",
+     {"payment_terms_days": 45, "early_pay_discount_pct": 1.0, "discount_days": 15, "late_interest_pct_per_month": 1.0,
+      "tolerance_amount": 5.0, "dispute_window_days": 365}),
+    ("rule_apx", "cp_apex", "AP_PAYMENT", "Apex Packaging Purchase Terms", 1, "PUBLISHED", f"{Y}-01-01", f"{Y}-12-31",
+     {"tolerance_amount": 1.0, "dispute_window_days": 365}),
+    ("rule_cls", "cp_cloudsuite", "SAAS_LICENSE", "CloudSuite Enterprise Order Form 2026", 1, "PUBLISHED", f"{Y}-01-01", f"{Y}-12-31",
+     {"committed_seats": 200, "price_per_seat": 45.0, "tolerance_amount": 1.0, "dispute_window_days": 60}),
+    ("rule_pys", "cp_paystream", "PAYMENT_PROCESSING", "PayStream Merchant Agreement – Pricing Schedule", 1, "PUBLISHED", f"{Y}-01-01", f"{Y}-12-31",
+     {"pct_rate": 2.7, "fixed_per_txn": 0.30, "chargeback_fee": 15.0, "tolerance_amount": 1.0, "dispute_window_days": 120}),
+    ("rule_lmn", "cp_lumen", "ROYALTY", "Lumen Brand License Agreement", 1, "PUBLISHED", f"{Y}-01-01", f"{Y}-12-31",
+     {"royalty_pct": 6.0, "minimum_guarantee": 30000, "tolerance_amount": 1.0, "dispute_window_days": 365}),
     ("rule_amz_v1", "cp_amazon", "MARKETPLACE_FEE", "Amazon Business Solutions Agreement 2025", 1, "RETIRED", "2025-01-01", "2025-12-31",
      {"referral_fee_pct": {**REF_PCT, "Kitchen": 15.0}, "referral_min_fee": 0.30, "fulfillment_fee_per_unit": 5.10,
       "closing_fee_per_unit": 0.0, "tolerance_amount": 0.05, "dispute_window_days": 90}),
@@ -46,6 +73,11 @@ CLAUSES = {
     "PRICE_VARIANCE": "Supplier shall invoice at the net prices listed in Schedule A for the agreement term.",
     "REBATE": "A retroactive volume rebate is earned at the highest tier reached on total quarterly purchases.",
     "FREIGHT": "Linehaul charges at contracted rate per kg plus fuel surcharge; accessorials capped per shipment.",
+    "AR_RECEIVABLE": "Invoices are payable in full within the agreed term; the early-payment discount applies only if paid within the discount window; overdue balances accrue interest monthly.",
+    "AP_PAYMENT": "Payment shall be made once per approved invoice and shall not exceed the invoiced and received amount.",
+    "SAAS_LICENSE": "Customer is billed for committed seats at the contracted unit price; additional seats are billable only when provisioned and in use.",
+    "PAYMENT_PROCESSING": "Merchant discount rate and per-transaction fee per the Pricing Schedule; chargeback handling fee per occurrence.",
+    "ROYALTY": "Licensee shall pay a royalty on net sales at the agreed rate, subject to the minimum guarantee per period.",
 }
 
 
@@ -137,19 +169,90 @@ PROGRESS = ["RECOVERED", "RECOVERED", "CLAIM_SENT", "PARTIALLY_RECOVERED", "APPR
             "IN_REVIEW", "CLAIM_SENT", "DISMISSED", "RECOVERED", "WRITTEN_OFF", "ESCALATED"]
 
 
+def _rows_v2(rng):
+    out = {}
+    for cp, n, terms_days, disc, ddays in (("cp_northwind", 12, 30, 2.0, 10), ("cp_brightline", 7, 45, 1.0, 15)):
+        rows = []
+        for i, d in enumerate(_dates(rng, n, end=date(2026, 9, 30))):
+            inv_d = date.fromisoformat(d)
+            due = inv_d + timedelta(days=terms_days)
+            amt = rng.randint(15, 80) * 1000 + rng.choice([0, 250, 500, 750])
+            credit = 1200 if cp == "cp_brightline" and i % 3 == 0 else 0
+            net = amt - credit
+            kind = i % 5
+            if kind == 0:
+                paid, pay = net, due - timedelta(days=2)
+            elif kind == 1:
+                paid, pay = net - rng.randint(8, 40) * 100, due - timedelta(days=1)
+            elif kind == 2:
+                paid, pay = round(net * (1 - disc / 100), 2), inv_d + timedelta(days=ddays + 12)
+            elif kind == 3:
+                paid, pay = 0, None
+            else:
+                paid, pay = net, due + timedelta(days=rng.randint(20, 45))
+            if pay and pay > date(2026, 10, 20):
+                paid, pay = 0, None
+            rows.append({"invoice_no": f"{'NW' if cp == 'cp_northwind' else 'BL'}-INV-{20900 + i * 17}", "date": d,
+                         "due_date": due.isoformat(), "invoice_amount": amt, "credit_notes": credit, "amount_paid": paid,
+                         "payment_date": pay.isoformat() if pay else ""})
+        out[(cp, "AR_RECEIVABLE")] = rows
+    ap = []
+    for i, d in enumerate(_dates(rng, 12)):
+        inv = rng.randint(30, 180) * 100
+        paid = inv + (rng.choice([850, 1240, 2300]) if i in (3, 8) else 0)
+        ap.append({"payment_id": f"PAY-{88000 + i * 7}", "date": d, "vendor_invoice_no": f"APX-{5500 + i * 3}",
+                   "invoice_amount": inv, "amount_paid": paid})
+    dup = dict(ap[5]); dup["payment_id"] = "PAY-88999"; dup["date"] = "2026-10-06"
+    ap.append(dup)
+    out[("cp_apex", "AP_PAYMENT")] = ap
+    saas = []
+    for m, (billed, unit, used) in zip(range(5, 11), [(200, 45, 188), (215, 45, 196), (230, 45, 204), (230, 49, 207), (240, 49, 212), (240, 49, 215)]):
+        saas.append({"invoice_no": f"CS-2026-{m:02d}", "date": f"2026-{m:02d}-01", "product": "CRM Enterprise",
+                     "seats_billed": billed, "unit_price_billed": unit, "seats_in_use": used})
+    out[("cp_cloudsuite", "SAAS_LICENSE")] = saas
+    ps = []
+    for i, d in enumerate(_dates(rng, 10)):
+        vol = rng.randint(90, 260) * 1000
+        n = int(vol / rng.randint(45, 70))
+        pct = 2.9 if i % 3 == 1 else 2.7
+        cb = rng.randint(0, 6)
+        ps.append({"settlement_id": f"PS-{d.replace('-', '')}", "date": d, "card_volume": vol, "txn_count": n,
+                   "processing_fees_charged": round(vol * pct / 100 + n * 0.30, 2), "chargebacks": cb,
+                   "chargeback_fees_charged": cb * (25 if i % 4 == 2 else 15)})
+    out[("cp_paystream", "PAYMENT_PROCESSING")] = ps
+    out[("cp_lumen", "ROYALTY")] = [
+        {"statement_id": "LMN-RY-2026-Q1", "date": "2026-03-31", "period": "2026-Q1", "net_sales": 610000, "royalty_paid": 36600},
+        {"statement_id": "LMN-RY-2026-Q2", "date": "2026-06-30", "period": "2026-Q2", "net_sales": 380000, "royalty_paid": 22800},
+        {"statement_id": "LMN-RY-2026-Q3", "date": "2026-09-30", "period": "2026-Q3", "net_sales": 940000, "royalty_paid": 47000},
+    ]
+    return out
+
+
 async def seed_if_empty():
-    if await db.counterparties.count_documents({}) > 0:
+    meta = await db.settings.find_one({"id": "seed"}, {"_id": 0})
+    if not meta:
+        meta = {"id": "seed", "cps": ORIGINAL_CPS if await db.counterparties.count_documents({}) else []}
+        await db.settings.insert_one({**meta})
+    todo = [c for c in CPS if c["id"] not in meta["cps"]]
+    if not todo:
         return
+    ids = {c["id"] for c in todo}
+    existing = {c["id"] for c in await db.cases.find({}, {"_id": 0, "id": 1}).to_list(100000)}
     rng = random.Random(42)
-    for cp in CPS:
+    all_rows = {**_rows(rng), **_rows_v2(random.Random(7))}
+    for cp in todo:
         await db.counterparties.insert_one({**cp, "sample": True, "created_at": now_iso()})
     names = {c["id"]: c["name"] for c in CPS}
     for rid, cp, dom, name, ver, status, ef, et, terms in RULES:
+        if cp not in ids:
+            continue
         await db.rules.insert_one({"id": rid, "name": name, "counterparty_id": cp, "counterparty_name": names[cp], "domain": dom,
                                    "version": ver, "status": status, "effective_from": ef, "effective_to": et, "terms": terms,
                                    "source_ref": name, "clause_text": CLAUSES[dom], "created_by": "System (sample)",
                                    "created_at": now_iso(), "published_at": now_iso(), "sample": True})
-    for (cp_id, dom), rows in _rows(rng).items():
+    for (cp_id, dom), rows in all_rows.items():
+        if cp_id not in ids:
+            continue
         cp = next(c for c in CPS if c["id"] == cp_id)
         bid = f"bat_sample_{cp_id[3:]}"
         res = await insert_transactions(rows, dom, cp, bid)
@@ -158,8 +261,13 @@ async def seed_if_empty():
                                      "inserted": res["inserted"], "skipped": res["skipped"], "uploaded_by": "System (sample)",
                                      "created_at": now_iso(), "detection": None, "sample": True})
     await run_detection(None)
-    await db.transactions.update_many({}, {"$set": {"sample": True}})
-    cases = await db.cases.find({}, {"_id": 0}).sort("txn_date", 1).to_list(1000)
+    await db.transactions.update_many({"counterparty_id": {"$in": list(ids)}}, {"$set": {"sample": True}})
+    cases = [c for c in await db.cases.find({"counterparty_id": {"$in": list(ids)}}, {"_id": 0}).sort("txn_date", 1).to_list(1000)
+             if c["id"] not in existing]
+    for bid in {c["batch_id"] for c in cases}:
+        mine = [c for c in cases if c["batch_id"] == bid]
+        await db.batches.update_one({"id": bid}, {"$set": {"detection": {"leaks": len(mine), "amount": round(sum(c["leak_amount"] for c in mine), 2)}}})
+    await db.settings.update_one({"id": "seed"}, {"$addToSet": {"cps": {"$each": list(ids)}}})
     for i, c in enumerate(cases):
         if c["txn_date"] > "2026-09-25":
             upd = {"sample": True}

@@ -39,8 +39,12 @@ async def draft_email(case_id: str, member: dict = Depends(require_cap("work_cas
         raise HTTPException(404, "Case not found")
     cp = await db.counterparties.find_one({"id": c["counterparty_id"]}, {"_id": 0}) or {}
     s = await get_settings()
+    purpose = {"AR_RECEIVABLE": "payment collection request to our customer for the outstanding balance",
+               "AP_PAYMENT": "request to our vendor to refund the overpaid / duplicate payment",
+               "ROYALTY": "royalty underpayment notice to our licensee",
+               "REBATE": "rebate shortfall claim"}.get(c["domain"], "billing dispute / credit claim")
     facts = {
-        "our_company": s["company_name"], "sender_name": member.get("name"), "counterparty": c["counterparty_name"],
+        "email_purpose": purpose, "our_company": s["company_name"], "sender_name": member.get("name"), "counterparty": c["counterparty_name"],
         "counterparty_contact": cp.get("contact_name"), "domain": DOMAINS[c["domain"]]["label"],
         "leak_type": c["leak_type"], "reference": c["ref"], "transaction_date": c["txn_date"],
         "calculation_lines": c["lines"], "total_claim": f"{c['leak_amount']:,.2f} {c['currency']}",

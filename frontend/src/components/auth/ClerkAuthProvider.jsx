@@ -4,19 +4,19 @@ import { ClerkProvider } from "@clerk/react";
 
 const appearance = {
   variables: {
-    colorPrimary: "#10b981",
-    colorPrimaryForeground: "#0b0f19",
-    colorBackground: "#111827",
-    colorForeground: "#f9fafb",
-    colorMutedForeground: "#9ca3af",
-    colorNeutral: "#f9fafb",
-    colorInput: "#0b0f19",
-    colorInputForeground: "#f9fafb",
-    colorBorder: "#1f2937",
+    colorPrimary: "#059669",
+    colorPrimaryForeground: "#ffffff",
+    colorBackground: "#ffffff",
+    colorForeground: "#0f172a",
+    colorMutedForeground: "#64748b",
+    colorNeutral: "#0f172a",
+    colorInput: "#ffffff",
+    colorInputForeground: "#0f172a",
+    colorBorder: "#e2e8f0",
     fontFamily: "Manrope, sans-serif",
-    borderRadius: "0.4rem",
+    borderRadius: "0.5rem",
   },
-  captcha: { theme: "dark" },
+  captcha: { theme: "light" },
 };
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;

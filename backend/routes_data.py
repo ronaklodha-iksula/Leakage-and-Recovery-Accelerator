@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from core import db, now_iso, new_id, audit, require_cap, get_settings
-from engine import DOMAINS
+from engine import DOMAINS, DOMAIN_INFO
 from services import run_detection, insert_transactions
 
 router = APIRouter(prefix="/api")
@@ -15,8 +15,8 @@ P = "_id"
 
 @router.get("/domains")
 async def domains(member: dict = Depends(require_cap("read"))):
-    return [{"key": k, "label": v["label"], "columns": v["columns"], "default_terms": v["default_terms"]}
-            for k, v in DOMAINS.items()]
+    return [{"key": k, "label": v["label"], "columns": v["columns"], "default_terms": v["default_terms"],
+             "group": DOMAIN_INFO[k][0], "desc": DOMAIN_INFO[k][1]} for k, v in DOMAINS.items()]
 
 
 @router.get("/templates/{domain}")
@@ -175,9 +175,9 @@ async def ingest(file: UploadFile = File(...), domain: str = Form(...), counterp
     if missing:
         raise HTTPException(422, f"Missing required columns: {', '.join(missing)}")
     df["date"] = df["date"].astype(str).str[:10]
-    for c in ("promised_date", "delivered_date"):
+    for c in ("promised_date", "delivered_date", "due_date", "payment_date"):
         if c in df.columns:
-            df[c] = df[c].astype(str).str[:10]
+            df[c] = df[c].astype(str).str[:10].replace({"nan": "", "NaT": "", "None": ""})
     rows = df.to_dict(orient="records")
     batch_id = new_id("bat_")
     res = await insert_transactions(rows, domain, cp, batch_id)

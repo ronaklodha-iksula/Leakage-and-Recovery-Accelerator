@@ -1,153 +1,105 @@
 {
-  "project_name": "Iksula Financial Leakage & Recovery Accelerator",
-  "app_type": "Enterprise SaaS / CFO Financial Dashboard & Recovery Command Center",
-  "design_archetype": "Swiss & High-Contrast Tactical Precision for Finance (Institutional Navy & Obsidian Slate)",
-  "theme_strategy": {
-    "default_mode": "dark",
-    "theme_toggle": true,
-    "dark_mode_background": "hsl(222, 47%, 7%)",
-    "light_mode_background": "hsl(210, 20%, 98%)",
-    "description": "Ultra-crisp dark theme with charcoal-obsidian cards for dense financial monitoring, with warm slate light mode option. State-only visual signals (Emerald for recovered/approved, Crimson/Amber for leakage/at risk, Violet/Cyan for AI & rules)."
-  },
+  "theme": "light",
+  "product_concept": "Modern Enterprise Financial Leakage & Recovery Accelerator for CFOs and Accounting Teams",
   "typography": {
-    "heading_font": "Cabinet Grotesk / Outfit / Plus Jakarta Sans",
-    "body_font": "Inter / DM Sans",
-    "mono_font": "JetBrains Mono / Fira Code",
-    "font_rules": [
-      "DO NOT use Inter for main headings; use Cabinet Grotesk or Outfit with tight tracking (tracking-tight) for authority.",
-      "Use JetBrains Mono / tabular numbers (font-mono tnum) for all financial dollar amounts ($124,500.00), confidence percentages (98.4%), and clause numbers to ensure vertical visual alignment.",
-      "H1 Maximum Size: text-4xl sm:text-5xl lg:text-6xl. Subtitles must be text-lg to text-xl.",
-      "Overlines / Eyebrows: uppercase, text-xs, font-mono, tracking-[0.2em], text-emerald-400 or text-slate-400."
-    ]
+    "heading_font": "Outfit",
+    "body_font": "Manrope",
+    "mono_font": "JetBrains Mono",
+    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+    "heading_class": "font-['Outfit'] font-bold tracking-tight text-slate-900",
+    "body_class": "font-['Manrope'] text-slate-600 antialiased",
+    "eyebrow_class": "font-['JetBrains_Mono'] text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400",
+    "numeric_class": "font-['JetBrains_Mono'] tabular-nums tracking-tight font-semibold"
   },
-  "colors": {
-    "palette_name": "Tactical Financial Recovery (Obsidian, Signal Emerald, Risk Crimson, AI Violet)",
-    "neutrals": {
-      "dark_bg": "#0b0f19",
-      "dark_card": "#111827",
-      "dark_border": "#1f2937",
-      "dark_surface_hover": "#1e293b",
-      "text_primary_dark": "#f9fafb",
-      "text_secondary_dark": "#9ca3af",
-      "light_bg": "#f8fafc",
-      "light_card": "#ffffff",
-      "light_border": "#e2e8f0",
-      "text_primary_light": "#0f172a",
-      "text_secondary_light": "#64748b"
-    },
-    "state_colors": {
-      "leakage_danger": {
-        "hex": "#ef4444",
-        "tailwind": "text-rose-500 bg-rose-500/10 border-rose-500/20",
-        "usage": "High severity leakage detected, unrecovered financial loss, contract violations"
-      },
-      "recovered_success": {
-        "hex": "#10b981",
-        "tailwind": "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-        "usage": "Recovered funds, approved claims, verified OTIF/fee calculations"
-      },
-      "in_dispute_warning": {
-        "hex": "#f59e0b",
-        "tailwind": "text-amber-400 bg-amber-500/10 border-amber-500/20",
-        "usage": "Claim submitted to Amazon/retailer, pending vendor response, expiring dispute window"
-      },
-      "ai_copilot_accent": {
-        "hex": "#8b5cf6",
-        "tailwind": "text-violet-400 bg-violet-500/10 border-violet-500/20",
-        "usage": "AI contract term extraction, automated recovery email generation, streaming draft"
-      },
-      "domain_marketplace_fees": "#3b82f6",
-      "domain_retail_otif": "#ec4899",
-      "domain_price_variance": "#06b6d4",
-      "domain_rebate_shortfall": "#8b5cf6",
-      "domain_freight_overcharge": "#f97316"
-    },
-    "contrast_rules": [
-      "Never use pure black #000000; use #0b0f19 or #0f172a with subtle slate blue undertones.",
-      "Green and Red are strictly state-only for monetary gain vs loss. Buttons must use primary slate/emerald branding, not plain red/green unless explicitly committing/approving actions.",
-      "Hover states must explicitly declare text color: hover:bg-slate-800 hover:text-white."
-    ]
+  "color_tokens_hsl": {
+    "--background": "210 20% 98%",
+    "--foreground": "222 47% 11%",
+    "--card": "0 0% 100%",
+    "--card-foreground": "222 47% 11%",
+    "--popover": "0 0% 100%",
+    "--popover-foreground": "222 47% 11%",
+    "--primary": "160 84% 36%",
+    "--primary-foreground": "0 0% 100%",
+    "--secondary": "215 25% 95%",
+    "--secondary-foreground": "222 47% 11%",
+    "--muted": "214 16% 94%",
+    "--muted-foreground": "215 16% 47%",
+    "--accent": "210 20% 95%",
+    "--accent-foreground": "222 47% 11%",
+    "--destructive": "0 84% 60%",
+    "--destructive-foreground": "0 0% 100%",
+    "--border": "214 20% 89%",
+    "--input": "214 20% 89%",
+    "--ring": "160 84% 36%",
+    "--radius": "0.5rem"
   },
-  "layout_and_grids": {
-    "dashboard_grid": "MODE B: High Density Command Center (grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6). Direct grid children with h-full cards.",
-    "kpi_banner_ratio": "5 key metric cards spanning grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4",
-    "case_detail_layout": "Asymmetric 3-column split (Col-1: Summary & Calc Breakdown - 5 cols; Col-2: Contract Clause & AI Email Streamer - 4 cols; Col-3: Escalation Workflow & Audit History - 3 cols)",
-    "bento_features_landing": "Tetris grid on marketing view (Hero banner 8 cols, live recovery counter 4 cols, domain cards 4 cols each)",
-    "padding_standard": "p-4 sm:p-6 lg:p-8 for containers. Internal card padding minimum p-5 to prevent text collision with borders."
-  },
-  "key_views_specifications": {
-    "public_landing_page": {
-      "route": "/ (when signed out)",
-      "components": "Header with live ticker ribbon + Auth sign-in trigger, Hero split (Left: bold value proposition 'Stop Profit Leakage in Amazon & Retail Contracts', Right: Interactive Leakage Simulator), Domain Grid (Amazon Vendor Fee Overcharge, OTIF Fines, Price Variance, Rebates, Freight), ROI Calculator Widget, Security & Audit Compliance Badges, Clerk Auth Modal integration."
+  "leakage_domains": {
+    "Partner & Channel": {
+      "Marketplace fees": "#0284C7",
+      "Retail OTIF deductions": "#2563EB",
+      "Payment processing fees": "#4F46E5"
     },
-    "control_tower_dashboard": {
-      "route": "/app/dashboard",
-      "components": "Top KPI strip (Leakage Identified, Recoverable Amount, In-Claim Dispute, Recovered YTD, Recovery Rate %), Monthly Trend Chart & Leakage by Domain (Recharts), Expiring Dispute Windows Alert Bar, Counterparty Leakage Heatmap (Amazon, Walmart, Target, Wayfair), My Action Queue table with 1-click Escalation."
+    "Procurement & Payables": {
+      "Supplier price variance": "#D97706",
+      "Freight overcharge": "#EA580C",
+      "AP overpayment/duplicate payments": "#DC2626",
+      "SaaS license overbilling": "#9333EA"
     },
-    "leakages_table_view": {
-      "route": "/app/leakages",
-      "components": "Multi-filter bar (Domain, Counterparty, Status, Severity, Assigned Role), Search by Order/ASIN/Invoice #, Sortable Table with risk score badge, Quick Action Drawer preview, Bulk dispute export & Batch Assign button."
-    },
-    "case_detail_view": {
-      "route": "/app/leakages/:id",
-      "components": "Expected vs Charged calculation math widget with side-by-side delta, Contract Clause citation block with confidence rating (e.g. 98.2% AI Match to Section 4.2 Fee Schedule), Role-based Action Bar (Assign/Escalate to Senior CFO, Approve Claim, Reject, Send Recovery Email, Record Recovery), Streaming AI Email Draft Editor (Claude powered), Audit History Timeline & Team Comments."
-    },
-    "recovery_kanban_pipeline": {
-      "route": "/app/pipeline",
-      "components": "Drag-and-Drop / Categorized Kanban columns: Identified -> Under Review -> Escalated to Senior -> Claim Drafted -> Submitted to Vendor -> Recovered / Settled -> Written Off. Card displays amount, deadline tag, assignee avatar, counterparty logo."
-    },
-    "data_ingestion_portal": {
-      "route": "/app/ingest",
-      "components": "Domain selector (Marketplace Fees, OTIF, Freight, Price Variance, Rebates), Drag-and-drop CSV/Excel dropzone with sample template download link, Parsing progress indicator, Ingested Batches log, Instant Detection Trigger button."
-    },
-    "truth_layer_contracts": {
-      "route": "/app/contracts",
-      "components": "Counterparty rule cards (e.g., Amazon Vendor Agreement 2026 - Fee cap 12.5%), Rule Versioning control, AI Contract Reader dropzone ('Paste contract text or PDF to auto-generate rule cards'), Active rule toggle switches."
-    },
-    "assurance_and_audit": {
-      "route": "/app/assurance & /app/audit-log",
-      "components": "Assurance queue for high-value claims requiring dual-signature approval, Immutable Audit Log table tracking every user action, status change, and email dispatch with timestamp, user role, and IP."
-    },
-    "copilot_chat": {
-      "route": "Floating Drawer / /app/copilot",
-      "components": "AI Assistant drawer 'Ask about financial leakages', suggested prompts ('What is our biggest Amazon fee overcharge this month?', 'Draft an OTIF dispute for Walmart invoice #9921')."
+    "Revenue & Receivables": {
+      "B2B customer short payments/overdue invoices": "#059669",
+      "Rebate shortfall": "#0D9488",
+      "Royalty underpayment": "#0891B2"
     }
   },
-  "role_based_controls": {
-    "roles": ["Viewer/CFO", "Analyst", "Approver", "Assurance", "Rule Author", "Admin"],
-    "behavior": "Render explicit role badge in top navbar. Disable restricted action buttons (e.g. Analyst sees 'Escalate to Senior Approver', Approver sees 'Approve & Dispatch Claim Email', Admin sees 'Manage Team Roles')."
+  "status_chips": {
+    "OPEN": "bg-amber-50 text-amber-800 border-amber-200/80 font-medium",
+    "IN_REVIEW": "bg-sky-50 text-sky-800 border-sky-200/80 font-medium",
+    "ESCALATED": "bg-rose-50 text-rose-800 border-rose-200/80 font-medium ring-1 ring-rose-300/30",
+    "APPROVED": "bg-emerald-50 text-emerald-800 border-emerald-200/80 font-medium",
+    "CLAIM_SENT": "bg-indigo-50 text-indigo-800 border-indigo-200/80 font-medium",
+    "PARTIALLY_RECOVERED": "bg-teal-50 text-teal-800 border-teal-200/80 font-medium",
+    "RECOVERED": "bg-emerald-100 text-emerald-900 border-emerald-300 font-semibold shadow-xs",
+    "DENIED": "bg-red-50 text-red-800 border-red-200/80 font-medium",
+    "DISMISSED": "bg-slate-100 text-slate-700 border-slate-200 font-medium",
+    "WRITTEN_OFF": "bg-zinc-100 text-zinc-500 border-zinc-200 line-through decoration-zinc-400"
   },
-  "micro_interactions_and_motion": {
-    "library": "framer-motion (or CSS transitions)",
-    "rules": [
-      "No universal transition: all. Use explicit transition: transform 0.2s ease, opacity 0.2s ease.",
-      "Hover effects on table rows: subtle glow border-l-2 border-emerald-500 bg-slate-800/40.",
-      "AI Streaming text effect for email draft generation (simulated or real SSE indicator).",
-      "KPI counter entry animation and progress bar fill on load."
-    ]
+  "tailwind_recipes": {
+    "page_background": "min-h-screen bg-slate-50/80 text-slate-900 selection:bg-emerald-500/20 selection:text-emerald-900",
+    "sidebar": "w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between p-4 shadow-xs",
+    "card_panel": "bg-white border border-slate-200/80 rounded-xl shadow-xs hover:border-slate-300/80 transition-all duration-200 p-5",
+    "kpi_card": "bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs relative overflow-hidden group hover:shadow-md hover:border-slate-300 transition-all duration-200",
+    "btn_primary": "bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-xs hover:shadow transition-all duration-150 active:scale-[0.98] disabled:opacity-50",
+    "btn_secondary": "bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-medium px-4 py-2.5 rounded-lg border border-slate-200/80 transition-all duration-150 active:scale-[0.98]",
+    "btn_ghost": "hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-medium px-3 py-2 rounded-lg transition-colors duration-150",
+    "input": "bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 transition-all duration-150",
+    "table_header": "bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold text-xs uppercase tracking-wider px-4 py-3 text-left",
+    "table_row": "border-b border-slate-100 hover:bg-slate-50/60 transition-colors duration-150 text-sm text-slate-700",
+    "chart_colors": [
+      "#059669",
+      "#0284C7",
+      "#D97706",
+      "#4F46E5",
+      "#9333EA"
+    ],
+    "landing_hero": "bg-gradient-to-b from-slate-50 via-white to-slate-50/50 border-b border-slate-200/60 py-20 px-6 text-center relative overflow-hidden"
   },
-  "image_urls": {
-    "hero_analytics_dark": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwxfHxmaW5hbmNpYWwlMjBkYXRhJTIwYW5hbHl0aWNzJTIwYWJzdHJhY3QlMjBsaW5lJTIwY2hhcnQlMjBncmFwaCUyMGRhc2hib2FyZCUyMGJhY2tncm91bmR8ZW58MHx8fGJsYWNrfDE3OTI3NDAwMDF8MA&ixlib=rb-4.1.0&q=85",
-    "executive_meeting": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwyfHxmaW5hbmNlJTIwZXhlY3V0aXZlJTIwZGlzY3Vzc2luZyUyMGFuYWx5dGljcyUyMGRhc2hib2FyZCUyMG1lZXRpbmd8ZW58MHx8fHwxNzkyNzQwMDEwfDA&ixlib=rb-4.1.0&q=85",
-    "financial_data_chart": "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwzfHxmaW5hbmNpYWwlMjBkYXRhJTIwYW5hbHl0aWNzJTIwYWJzdHJhY3QlMjBsaW5lJTIwY2hhcnQlMjBncmFwaCUyMGRhc2hib2FyZCUyMGJhY2tncm91bmR8ZW58MHx8fGJsYWNrfDE3OTI3NDAwMDF8MA&ixlib=rb-4.1.0&q=85",
-    "team_collaboration": "https://images.pexels.com/photos/8069521/pexels-photo-8069521.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  "clerk_light_theme_appearance": {
+    "variables": {
+      "colorPrimary": "#059669",
+      "colorBackground": "#ffffff",
+      "colorText": "#0f172a",
+      "colorTextSecondary": "#64748b",
+      "colorInputBackground": "#ffffff",
+      "colorInputText": "#0f172a",
+      "borderRadius": "0.5rem"
+    }
   },
-  "testing_attributes_convention": {
-    "rule": "Every interactive element (buttons, filters, inputs, tabs, table cells, modal triggers) MUST include a kebab-case data-testid attribute.",
-    "examples": [
-      "data-testid='login-submit-button'",
-      "data-testid='kpi-card-total-leakage'",
-      "data-testid='leakage-row-101-escalate-button'",
-      "data-testid='ai-email-generate-button'",
-      "data-testid='role-selector-dropdown'",
-      "data-testid='csv-upload-dropzone'"
-    ]
-  },
-  "instructions_to_main_agent": [
-    "Ensure all components use clear Shadcn UI patterns with custom Tailwind styling.",
-    "Include pre-populated sample mock data for Amazon vendor fees, OTIF claims, freight overcharges, and price variances so the user can immediately test all recovery flows without manual CSV uploads.",
-    "Make sure the escalation workflow lets a junior Analyst assign a leakage issue to a Senior Approver/CFO with automated notification toast.",
-    "Implement streaming AI draft generation for recovery emails with editable subject line, recipient field, and send trigger.",
-    "Always set explicit text color on hover states."
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Strictly Light Theme ONLY. No dark mode toggle unless requested by user. Primary theme is clean, crisp light background (slate-50 / white).",
+    "Use Outfit for headers, Manrope for body text, and JetBrains Mono for monetary values and metrics.",
+    "Ensure all interactive elements (buttons, inputs, links, tabs, dialog triggers) have explicit data-testid attributes.",
+    "Do not use transparent background on dropdown menus, modals, or header overlays — use solid white with shadow-md or backdrop-blur-md bg-white/90.",
+    "Ensure monetary values use font-mono tabular-nums and colored indicators (green for recovered, amber for identified/pending).",
+    "Assign distinct group and domain badge colors based on leakage_domains mapping."
   ]
 }

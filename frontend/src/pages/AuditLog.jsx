@@ -13,20 +13,20 @@ export default function AuditLog() {
     <div>
       <PageHeader eyebrow="Immutable" title="Audit log" desc="Every detection, status change, assignment, email and rule publication — who, what, when." />
       <form onSubmit={(e) => { e.preventDefault(); setApplied(q); }} className="relative max-w-md mb-4">
-        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter by action or detail…" className="w-full bg-card border border-input rounded-sm pl-9 pr-3 py-2 text-sm" data-testid="audit-search-input" />
+        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter by action or detail… (Enter)" className="field pl-9" data-testid="audit-search-input" />
       </form>
       <div className="panel overflow-x-auto">
         <table className="w-full text-sm" data-testid="audit-table">
-          <thead><tr className="text-left border-b border-border">{["When", "Actor", "Role", "Action", "Detail"].map((h) => <th key={h} className="eyebrow font-normal px-4 py-3">{h}</th>)}</tr></thead>
+          <thead><tr>{["When", "Actor", "Role", "Action", "Detail"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
           <tbody>
             {(data || []).map((e) => (
-              <tr key={e.id} className="border-b border-border last:border-0 hover:bg-slate-800/30">
-                <td className="px-4 py-2.5 num text-xs text-slate-500 whitespace-nowrap">{fmtDateTime(e.ts)}</td>
-                <td className="px-4 py-2.5 text-slate-200 whitespace-nowrap">{e.actor_name}</td>
-                <td className="px-4 py-2.5 text-xs text-slate-400 whitespace-nowrap">{e.actor_role}</td>
-                <td className="px-4 py-2.5 num text-xs text-emerald-300 whitespace-nowrap">{e.entity === "case" && e.entity_id !== "*" ? <Link to={`/app/leakages/${e.entity_id}`} className="hover:underline">{e.action}</Link> : e.action}</td>
-                <td className="px-4 py-2.5 text-xs text-slate-400 max-w-xl truncate">{e.detail}</td>
+              <tr key={e.id} className="tr">
+                <td className="px-4 py-2.5 num text-xs text-slate-400 whitespace-nowrap">{fmtDateTime(e.ts)}</td>
+                <td className="px-4 py-2.5 font-medium text-slate-800 whitespace-nowrap">{e.actor_name}</td>
+                <td className="px-4 py-2.5 text-xs text-slate-500 whitespace-nowrap">{e.actor_role}</td>
+                <td className="px-4 py-2.5 num text-xs font-semibold text-emerald-700 whitespace-nowrap">{e.entity === "case" && e.entity_id !== "*" ? <Link to={`/app/leakages/${e.entity_id}`} className="hover:underline">{e.action}</Link> : e.action}</td>
+                <td className="px-4 py-2.5 text-xs text-slate-500 max-w-xl truncate">{e.detail}</td>
               </tr>
             ))}
           </tbody>

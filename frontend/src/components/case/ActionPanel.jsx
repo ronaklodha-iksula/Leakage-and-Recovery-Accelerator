@@ -21,9 +21,9 @@ const ACTS = [
   { a: "reopen", label: "Reopen", icon: RotateCcw, cap: "work_case", from: ["DISMISSED", "DENIED", "WRITTEN_OFF"] },
 ];
 const TONE = {
-  amber: "bg-amber-500/10 border-amber-500/30 text-amber-200 hover:bg-amber-500/20",
-  emerald: "bg-emerald-500 text-[#0b0f19] border-emerald-500 font-semibold hover:bg-emerald-400",
-  default: "border-border text-slate-200 hover:bg-slate-800 hover:text-white",
+  amber: "bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100",
+  emerald: "bg-emerald-600 text-white border-emerald-600 font-semibold hover:bg-emerald-700 shadow-sm",
+  default: "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900",
 };
 
 const ActDialog = ({ act, c, onClose, onDone }) => {
@@ -45,7 +45,7 @@ const ActDialog = ({ act, c, onClose, onDone }) => {
   };
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="bg-card" data-testid={`action-dialog-${act.a}`}>
+      <DialogContent className="bg-white" data-testid={`action-dialog-${act.a}`}>
         <DialogHeader>
           <DialogTitle>{act.label} · {c.number}</DialogTitle>
           <DialogDescription>{act.a === "escalate" ? "Hand this to an Approver, CFO or Admin who has authority to approve and send the claim. They get an in-app and email notification." : `Leakage ${money(c.leak_amount)} with ${c.counterparty_name}.`}</DialogDescription>
@@ -59,11 +59,11 @@ const ActDialog = ({ act, c, onClose, onDone }) => {
             </SelectContent>
           </Select>
         )}
-        {act.dialog === "amount" && <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-background border border-input rounded-sm px-3 py-2 num" data-testid="recovery-amount-input" />}
-        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={act.a === "dismiss" ? "Why is this not a leak? (required)" : "Add a note (optional)"} className="w-full bg-background border border-input rounded-sm px-3 py-2 text-sm" data-testid="action-note-input" />
+        {act.dialog === "amount" && <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="field num" data-testid="recovery-amount-input" />}
+        <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={act.a === "dismiss" ? "Why is this not a leak? (required)" : "Add a note (optional)"} className="field" data-testid="action-note-input" />
         <DialogFooter>
-          <button onClick={onClose} className="px-4 py-2 text-sm rounded-sm border border-border hover:bg-slate-800">Cancel</button>
-          <button onClick={submit} disabled={busy || (act.dialog === "people" && !assignee)} data-testid="action-confirm-button" className="px-4 py-2 text-sm rounded-sm bg-emerald-500 text-[#0b0f19] font-semibold hover:bg-emerald-400 disabled:opacity-50">{busy ? "Working…" : "Confirm"}</button>
+          <button onClick={onClose} className="btn-secondary">Cancel</button>
+          <button onClick={submit} disabled={busy || (act.dialog === "people" && !assignee)} data-testid="action-confirm-button" className="btn-primary">{busy ? "Working…" : "Confirm"}</button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -81,14 +81,14 @@ export default function ActionPanel({ c, onChange }) {
   };
   return (
     <Panel eyebrow="Workflow" title="Actions" testId="case-actions">
-      <div className="text-xs text-slate-400 mb-3">Owner: <span className="text-white" data-testid="case-assignee">{c.assignee_name || "Unassigned"}</span></div>
+      <div className="text-xs text-slate-400 mb-3">Owner: <span className="text-slate-900 font-semibold" data-testid="case-assignee">{c.assignee_name || "Unassigned"}</span></div>
       <div className="space-y-2">
         {avail.map((act) => {
           const ok = can(act.cap);
           return (
             <button key={act.a} disabled={!ok} onClick={() => run(act)} data-testid={`action-${act.a}-button`}
               title={ok ? "" : `Your role (${me.role_label}) can't do this — escalate instead`}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-sm border transition-colors ${ok ? TONE[act.tone || "default"] : "border-border text-slate-600 cursor-not-allowed"}`}>
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${ok ? TONE[act.tone || "default"] : "border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed"}`}>
               {ok ? <act.icon className="h-4 w-4" /> : <Lock className="h-4 w-4" />}{act.label}
             </button>
           );

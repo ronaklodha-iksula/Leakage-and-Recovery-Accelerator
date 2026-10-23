@@ -46,6 +46,55 @@ DOMAINS = {
         "default_terms": {"rate_per_kg": 1.10, "fuel_surcharge_pct": 12.0, "min_charge": 150.0,
                           "max_accessorial": 50.0, "tolerance_amount": 1.0, "dispute_window_days": 90},
     },
+    "AR_RECEIVABLE": {
+        "label": "Customer short payments (B2B receivables)",
+        "columns": ["invoice_no", "date", "due_date", "invoice_amount", "credit_notes", "amount_paid", "payment_date"],
+        "ref": "invoice_no",
+        "sample": [["AR-INV-20931", "2026-08-01", "2026-08-31", 48500, 0, 46000, "2026-09-04"]],
+        "default_terms": {"payment_terms_days": 30, "early_pay_discount_pct": 2.0, "discount_days": 10,
+                          "late_interest_pct_per_month": 1.5, "tolerance_amount": 5.0, "dispute_window_days": 365},
+    },
+    "AP_PAYMENT": {
+        "label": "Vendor overpayments & duplicate payments",
+        "columns": ["payment_id", "date", "vendor_invoice_no", "invoice_amount", "amount_paid"],
+        "ref": "payment_id",
+        "sample": [["PAY-88012", "2026-09-03", "APX-5521", 12400, 12400]],
+        "default_terms": {"tolerance_amount": 1.0, "dispute_window_days": 365},
+    },
+    "SAAS_LICENSE": {
+        "label": "SaaS & license overbilling",
+        "columns": ["invoice_no", "date", "product", "seats_billed", "unit_price_billed", "seats_in_use"],
+        "ref": "invoice_no",
+        "sample": [["CS-2026-09", "2026-09-01", "CRM Enterprise", 260, 49, 214]],
+        "default_terms": {"committed_seats": 200, "price_per_seat": 45.0, "tolerance_amount": 1.0, "dispute_window_days": 60},
+    },
+    "PAYMENT_PROCESSING": {
+        "label": "Payment processing fees",
+        "columns": ["settlement_id", "date", "card_volume", "txn_count", "processing_fees_charged", "chargebacks", "chargeback_fees_charged"],
+        "ref": "settlement_id",
+        "sample": [["ST-2026-09-14", "2026-09-14", 182400, 3120, 5420.40, 4, 100]],
+        "default_terms": {"pct_rate": 2.7, "fixed_per_txn": 0.30, "chargeback_fee": 15.0, "tolerance_amount": 1.0, "dispute_window_days": 120},
+    },
+    "ROYALTY": {
+        "label": "Royalty & licensing income",
+        "columns": ["statement_id", "date", "period", "net_sales", "royalty_paid"],
+        "ref": "statement_id",
+        "sample": [["RY-2026-Q3", "2026-09-30", "2026-Q3", 940000, 47000]],
+        "default_terms": {"royalty_pct": 6.0, "minimum_guarantee": 30000, "tolerance_amount": 1.0, "dispute_window_days": 365},
+    },
+}
+
+DOMAIN_INFO = {
+    "MARKETPLACE_FEE": ("Partner & channel", "Referral, fulfilment and closing fees above the marketplace fee schedule (e.g. Amazon)."),
+    "RETAIL_DEDUCTION": ("Partner & channel", "OTIF / compliance chargebacks on on-time, in-full deliveries, invalid reason codes, duplicates, over-penalties."),
+    "PAYMENT_PROCESSING": ("Partner & channel", "Card processing and chargeback fees above the merchant agreement rate."),
+    "PRICE_VARIANCE": ("Procurement & payables", "Supplier invoices above the special pricing agreement, plus duplicate invoices."),
+    "FREIGHT": ("Procurement & payables", "Carrier bills above the rate card, fuel surcharge or accessorial caps, duplicate shipments."),
+    "AP_PAYMENT": ("Procurement & payables", "Vendor paid more than the approved invoice, or the same invoice paid twice."),
+    "SAAS_LICENSE": ("Procurement & payables", "Software seats billed above commitment/usage, or per-seat price above contract."),
+    "AR_RECEIVABLE": ("Revenue & receivables", "Customers short-paying invoices, taking unearned early-pay discounts, overdue balances and unbilled late interest."),
+    "REBATE": ("Revenue & receivables", "Volume rebates paid at a lower tier than earned."),
+    "ROYALTY": ("Revenue & receivables", "Licensees paying less than the royalty rate or minimum guarantee."),
 }
 
 
@@ -67,9 +116,9 @@ def _d(v):
         return None
 
 
-def _line(label, expected, actual):
+def _line(label, expected, actual, under=False):
     return {"label": label, "expected": round(expected, 2), "actual": round(actual, 2),
-            "variance": round(actual - expected, 2)}
+            "variance": round(actual - expected, 2), "dir": "under" if under else "over"}
 
 
 def eval_marketplace(t, terms):
@@ -136,7 +185,7 @@ def eval_rebate(t, terms):
             tier = tr
     pct = _f(tier["pct"]) if tier else 0
     expected = vol * pct / 100
-    lines = [_line(f"Rebate at {pct:g}% tier on {vol:,.0f}", expected, paid)]
+    lines = [_line(f"Rebate at {pct:g}% tier on {vol:,.0f}", expected, paid, under=True)]
     leak = max(expected - paid, 0) if expected - paid > 1 else 0
     why = f"Volume {vol:,.0f} qualifies for {pct:g}% tier; paid {paid / vol * 100 if vol else 0:.2f}%"
     return leak, lines, why, f"Rebate tier ≥{_f(tier['min_volume']) if tier else 0:,.0f} = {pct:g}%", "REBATE_SHORTFALL"
@@ -158,8 +207,91 @@ def eval_freight(t, terms):
     return leak, lines, why, clause, "RATE_OVERCHARGE"
 
 
+def eval_receivable(t, terms):
+    inv, credits, paid = _f(t.get("invoice_amount")), _f(t.get("credit_notes")), _f(t.get("amount_paid"))
+    inv_date, due, pay = _d(t.get("date")), _d(t.get("due_date")), _d(t.get("payment_date"))
+    if not due and inv_date:
+        due = inv_date + timedelta(days=int(_f(terms.get("payment_terms_days"), 30)))
+    disc_pct, disc_days = _f(terms.get("early_pay_discount_pct")), int(_f(terms.get("discount_days")))
+    tol, rate = _f(terms.get("tolerance_amount"), 5), _f(terms.get("late_interest_pct_per_month"))
+    today = datetime.now()
+    net = inv - credits
+    disc_ok = bool(pay and inv_date and disc_pct and pay <= inv_date + timedelta(days=disc_days))
+    expected = net * (1 - disc_pct / 100) if disc_ok else net
+    if not pay and paid == 0 and not (due and today > due):
+        return 0, [], "", "", ""
+    label = "Invoice net of approved credits" + (f" less {disc_pct:g}% early-pay discount" if disc_ok else "")
+    lines, reasons = [_line(label, expected, paid, under=True)], []
+    short = expected - paid if expected - paid > tol else 0
+    leak_type = "SHORT_PAYMENT"
+    if short and not pay and paid == 0:
+        leak_type = "UNPAID_OVERDUE"
+        reasons.append(f"Invoice unpaid {(today - due).days} days past due date {due.date()}")
+    elif short and disc_pct and not disc_ok and abs((net - paid) - net * disc_pct / 100) <= max(1, net * 0.002):
+        leak_type = "UNEARNED_DISCOUNT"
+        reasons.append(f"Customer deducted the {disc_pct:g}% early-pay discount but paid after the {disc_days}-day window")
+    elif short:
+        reasons.append(f"Short-paid by {short:,.2f} without an approved credit note")
+    interest = 0
+    if rate and due and ((pay and pay > due) or (not pay and today > due)):
+        days = ((pay or today) - due).days
+        interest = net * rate / 100 * days / 30
+        lines.append(_line(f"Late-payment interest ({days}d at {rate:g}%/month)", interest, 0, under=True))
+        reasons.append(f"Late-payment interest of {interest:,.2f} is owed under the payment terms")
+        if not short:
+            leak_type = "LATE_INTEREST"
+    clause = (f"Payment terms: net {terms.get('payment_terms_days')} days; {disc_pct:g}% discount if paid within "
+              f"{disc_days} days; late interest {rate:g}%/month")
+    return short + interest, lines, "; ".join(reasons), clause, leak_type
+
+
+def eval_ap(t, terms):
+    inv, paid = _f(t.get("invoice_amount")), _f(t.get("amount_paid"))
+    lines = [_line(f"Payment vs approved invoice {t.get('vendor_invoice_no')}", inv, paid)]
+    leak = paid - inv if paid - inv > _f(terms.get("tolerance_amount"), 1) else 0
+    return (leak, lines, f"Paid {paid:,.2f} against an approved invoice of {inv:,.2f}",
+            "Payments may not exceed the approved invoice amount (3-way match)", "OVERPAYMENT")
+
+
+def eval_saas(t, terms):
+    billed, unit, used = _f(t.get("seats_billed")), _f(t.get("unit_price_billed")), _f(t.get("seats_in_use"))
+    committed, price = _f(terms.get("committed_seats")), _f(terms.get("price_per_seat"))
+    billable = min(billed, max(committed, used))
+    lines = [_line(f"Seats: {billed:g} billed vs {billable:g} billable ({committed:g} committed, {used:g} in use)", billable * price, billed * price),
+             _line(f"Unit price: {unit:,.2f} billed vs {price:,.2f} contracted", billed * price, billed * unit)]
+    tol = _f(terms.get("tolerance_amount"), 1)
+    over = [ln for ln in lines if ln["variance"] > tol]
+    why = "; ".join(ln["label"].split(":")[0] + f" overbilled by {ln['variance']:,.2f}" for ln in over)
+    return (sum(ln["variance"] for ln in over), lines, why,
+            f"Order form: {committed:g} committed seats at {price:,.2f}/seat; true-up only for seats in use", "SEAT_OVERBILLING")
+
+
+def eval_processing(t, terms):
+    vol, n, cb = _f(t.get("card_volume")), _f(t.get("txn_count")), _f(t.get("chargebacks"))
+    pct, fixed, cbf = _f(terms.get("pct_rate")), _f(terms.get("fixed_per_txn")), _f(terms.get("chargeback_fee"))
+    lines = [_line(f"Processing ({pct:g}% + {fixed:g}/txn on {n:,.0f} txns)", vol * pct / 100 + n * fixed, _f(t.get("processing_fees_charged"))),
+             _line(f"Chargeback fees ({cb:g} × {cbf:g})", cb * cbf, _f(t.get("chargeback_fees_charged")))]
+    tol = _f(terms.get("tolerance_amount"), 1)
+    over = [ln for ln in lines if ln["variance"] > tol]
+    why = "; ".join(ln["label"].split(" (")[0] + f" overcharged by {ln['variance']:,.2f}" for ln in over)
+    return (sum(ln["variance"] for ln in over), lines, why,
+            f"Merchant agreement: {pct:g}% + {fixed:g} per transaction; chargeback fee {cbf:g}", "PROCESSING_OVERCHARGE")
+
+
+def eval_royalty(t, terms):
+    sales, paid = _f(t.get("net_sales")), _f(t.get("royalty_paid"))
+    pct, mg = _f(terms.get("royalty_pct")), _f(terms.get("minimum_guarantee"))
+    expected = max(sales * pct / 100, mg)
+    lines = [_line(f"Royalty {pct:g}% of {sales:,.0f} (min guarantee {mg:,.0f})", expected, paid, under=True)]
+    leak = expected - paid if expected - paid > _f(terms.get("tolerance_amount"), 1) else 0
+    return (leak, lines, f"Licensee paid {paid:,.2f}; contract requires {expected:,.2f}",
+            f"License agreement: royalty {pct:g}% of net sales, minimum guarantee {mg:,.0f} per period", "ROYALTY_SHORTFALL")
+
+
 EVALUATORS = {"MARKETPLACE_FEE": eval_marketplace, "RETAIL_DEDUCTION": eval_deduction,
-              "PRICE_VARIANCE": eval_price, "REBATE": eval_rebate, "FREIGHT": eval_freight}
+              "PRICE_VARIANCE": eval_price, "REBATE": eval_rebate, "FREIGHT": eval_freight,
+              "AR_RECEIVABLE": eval_receivable, "AP_PAYMENT": eval_ap, "SAAS_LICENSE": eval_saas,
+              "PAYMENT_PROCESSING": eval_processing, "ROYALTY": eval_royalty}
 
 
 def txn_amount(t):
@@ -172,6 +304,16 @@ def txn_amount(t):
         return _f(t.get("qty")) * _f(t.get("invoiced_unit_price"))
     if d == "REBATE":
         return _f(t.get("rebate_paid"))
+    if d == "AP_PAYMENT":
+        return _f(t.get("amount_paid"))
+    if d == "AR_RECEIVABLE":
+        return _f(t.get("invoice_amount"))
+    if d == "SAAS_LICENSE":
+        return _f(t.get("seats_billed")) * _f(t.get("unit_price_billed"))
+    if d == "PAYMENT_PROCESSING":
+        return _f(t.get("processing_fees_charged")) + _f(t.get("chargeback_fees_charged"))
+    if d == "ROYALTY":
+        return _f(t.get("royalty_paid"))
     return _f(t.get("billed_amount")) + _f(t.get("accessorial_charged"))
 
 
