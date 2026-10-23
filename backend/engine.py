@@ -52,7 +52,7 @@ DOMAINS = {
         "ref": "invoice_no",
         "sample": [["AR-INV-20931", "2026-08-01", "2026-08-31", 48500, 0, 46000, "2026-09-04"]],
         "default_terms": {"payment_terms_days": 30, "early_pay_discount_pct": 2.0, "discount_days": 10,
-                          "late_interest_pct_per_month": 1.5, "tolerance_amount": 5.0, "dispute_window_days": 365},
+                          "late_interest_pct_per_month": 1.5, "overdue_grace_days": 30, "tolerance_amount": 5.0, "dispute_window_days": 365},
     },
     "AP_PAYMENT": {
         "label": "Vendor overpayments & duplicate payments",
@@ -218,7 +218,7 @@ def eval_receivable(t, terms):
     net = inv - credits
     disc_ok = bool(pay and inv_date and disc_pct and pay <= inv_date + timedelta(days=disc_days))
     expected = net * (1 - disc_pct / 100) if disc_ok else net
-    if not pay and paid == 0 and not (due and today > due):
+    if not pay and paid == 0 and not (due and (today - due).days > int(_f(terms.get("overdue_grace_days"), 30))):
         return 0, [], "", "", ""
     label = "Invoice net of approved credits" + (f" less {disc_pct:g}% early-pay discount" if disc_ok else "")
     lines, reasons = [_line(label, expected, paid, under=True)], []
@@ -234,12 +234,16 @@ def eval_receivable(t, terms):
         reasons.append(f"Short-paid by {short:,.2f} without an approved credit note")
     interest = 0
     if rate and due and ((pay and pay > due) or (not pay and today > due)):
-        days = ((pay or today) - due).days
-        interest = net * rate / 100 * days / 30
-        lines.append(_line(f"Late-payment interest ({days}d at {rate:g}%/month)", interest, 0, under=True))
-        reasons.append(f"Late-payment interest of {interest:,.2f} is owed under the payment terms")
-        if not short:
-            leak_type = "LATE_INTEREST"
+        late_days = (pay - due).days if pay and pay > due else 0
+        open_days = (today - due).days if short and today > due else 0
+        interest = (paid * late_days + short * open_days) * rate / 100 / 30
+        if interest > tol:
+            lines.append(_line(f"Late-payment interest ({rate:g}%/month on late & outstanding amounts)", interest, 0, under=True))
+            reasons.append(f"Late-payment interest of {interest:,.2f} is owed under the payment terms")
+            if not short:
+                leak_type = "LATE_INTEREST"
+        else:
+            interest = 0
     clause = (f"Payment terms: net {terms.get('payment_terms_days')} days; {disc_pct:g}% discount if paid within "
               f"{disc_days} days; late interest {rate:g}%/month")
     return short + interest, lines, "; ".join(reasons), clause, leak_type

@@ -15,7 +15,8 @@ const bad = (l) => (l.dir === "under" ? l.variance < 0 : l.variance > 0);
 
 const Breakdown = ({ c }) => (
   <Panel eyebrow="Expected vs actual" title="Calculation" testId="case-breakdown">
-    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 text-sm">
+    <div className="overflow-x-auto">
+    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-4 text-sm min-w-[440px]">
       {["Line", "Per contract", "Actual", "Variance"].map((h) => <div key={h} className="eyebrow pb-2 border-b border-slate-200">{h}</div>)}
       {c.lines.map((l) => (
         <div key={l.label} className="contents">
@@ -25,6 +26,7 @@ const Breakdown = ({ c }) => (
           <div className={`py-2.5 border-b border-slate-100 num font-semibold text-right ${bad(l) ? "text-rose-600" : "text-slate-400"}`}>{l.variance > 0 ? "+" : ""}{money(l.variance, c.currency)}</div>
         </div>
       ))}
+    </div>
     </div>
     <div className="flex justify-between items-end mt-5 rounded-lg bg-slate-50 border border-slate-100 p-4">
       <div><div className="eyebrow">Recoverable</div><Money value={c.leak_amount} cur={c.currency} className="text-3xl text-slate-900" /></div>
@@ -38,7 +40,7 @@ const Txn = ({ t }) => (
   <Panel eyebrow="Source record" title="Transaction" testId="case-transaction">
     <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
       {Object.entries(t || {}).filter(([k]) => !HIDE.includes(k)).map(([k, v]) => (
-        <div key={k} className="contents"><dt className="text-slate-400 capitalize">{k.replace(/_/g, " ")}</dt><dd className="num text-slate-800 truncate">{v === null || v === undefined || v === "" ? "—" : String(v)}</dd></div>
+        <div key={k} className="contents"><dt className="text-slate-500 capitalize">{k.replace(/_/g, " ")}</dt><dd className="num text-slate-800 truncate">{v === null || v === undefined || v === "" ? "—" : String(v)}</dd></div>
       ))}
     </dl>
   </Panel>
@@ -97,7 +99,7 @@ export default function CaseDetail() {
           <h1 className="text-2xl sm:text-3xl font-bold mt-2">{LEAK_TYPES[c.leak_type] || c.leak_type} · {c.counterparty_name}</h1>
           <div className="text-sm text-slate-500 mt-1"><span className="num">{c.ref}</span> · {fmtDate(c.txn_date)} · {DOMAINS[c.domain]?.label}</div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-2.5"><div className="eyebrow text-amber-700/70">Leakage</div><Money value={c.leak_amount} cur={c.currency} className="text-xl text-amber-800" /></div>
           <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-2.5"><div className="eyebrow text-emerald-700/70">Recovered</div><Money value={c.recovered_amount} cur={c.currency} className="text-xl text-emerald-800" /></div>
           <div className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5"><div className="eyebrow">Window</div><div className={`num text-xl font-semibold flex items-center gap-1 ${d < 0 ? "text-rose-600" : d < 15 ? "text-amber-600" : "text-slate-900"}`} data-testid="case-window"><Clock className="h-4 w-4" />{d < 0 ? "Expired" : `${d}d`}</div></div>

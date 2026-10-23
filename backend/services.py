@@ -37,7 +37,7 @@ def dup_key(domain: str, row: dict):
     if domain == "RETAIL_DEDUCTION":
         return f"{row.get('po_number')}|{row.get('reason_code')}"
     if domain == "AP_PAYMENT":
-        return str(row.get("vendor_invoice_no") or "")
+        return f"{row.get('vendor_invoice_no')}|{row.get('amount_paid')}"
     return None
 
 

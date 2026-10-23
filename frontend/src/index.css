@@ -41,7 +41,7 @@
 }
 
 @layer components {
-    .eyebrow { @apply font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400; }
+    .eyebrow { @apply font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500; }
     .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
     .panel { @apply rounded-xl border border-slate-200/80 bg-white shadow-sm; }
     .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-[background-color,box-shadow,transform,color] duration-150 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none; }

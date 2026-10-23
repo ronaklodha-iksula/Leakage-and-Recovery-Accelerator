@@ -228,6 +228,12 @@ def _rows_v2(rng):
     return out
 
 
+async def backfill_batch_stats():
+    async for b in db.batches.find({"detection": None}, {"_id": 0, "id": 1}):
+        mine = await db.cases.find({"batch_id": b["id"]}, {"_id": 0, "leak_amount": 1}).to_list(10000)
+        await db.batches.update_one({"id": b["id"]}, {"$set": {"detection": {"leaks": len(mine), "amount": round(sum(c["leak_amount"] for c in mine), 2)}}})
+
+
 async def seed_if_empty():
     meta = await db.settings.find_one({"id": "seed"}, {"_id": 0})
     if not meta:
@@ -241,15 +247,15 @@ async def seed_if_empty():
     rng = random.Random(42)
     all_rows = {**_rows(rng), **_rows_v2(random.Random(7))}
     for cp in todo:
-        await db.counterparties.insert_one({**cp, "sample": True, "created_at": now_iso()})
+        await db.counterparties.update_one({"id": cp["id"]}, {"$setOnInsert": {**cp, "sample": True, "created_at": now_iso()}}, upsert=True)
     names = {c["id"]: c["name"] for c in CPS}
     for rid, cp, dom, name, ver, status, ef, et, terms in RULES:
         if cp not in ids:
             continue
-        await db.rules.insert_one({"id": rid, "name": name, "counterparty_id": cp, "counterparty_name": names[cp], "domain": dom,
+        await db.rules.update_one({"id": rid}, {"$setOnInsert": {"id": rid, "name": name, "counterparty_id": cp, "counterparty_name": names[cp], "domain": dom,
                                    "version": ver, "status": status, "effective_from": ef, "effective_to": et, "terms": terms,
                                    "source_ref": name, "clause_text": CLAUSES[dom], "created_by": "System (sample)",
-                                   "created_at": now_iso(), "published_at": now_iso(), "sample": True})
+                                   "created_at": now_iso(), "published_at": now_iso(), "sample": True}}, upsert=True)
     for (cp_id, dom), rows in all_rows.items():
         if cp_id not in ids:
             continue

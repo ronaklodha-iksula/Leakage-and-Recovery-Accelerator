@@ -45,7 +45,7 @@ const NavList = ({ onNavigate }) => {
     <nav className="p-3 space-y-5 overflow-y-auto">
       {SECTIONS.map((s) => (
         <div key={s.title}>
-          <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">{s.title}</div>
+          <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{s.title}</div>
           {s.items.filter((n) => !n.cap || can(n.cap)).map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} onClick={onNavigate} data-testid={`nav-${n.id}`}
               className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${isActive ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>

@@ -64,11 +64,11 @@ export default function Leakages() {
                     <td className="px-4 py-3 whitespace-nowrap"><Link to={`/app/leakages/${c.id}`} className="num font-semibold text-emerald-700 hover:underline flex items-center gap-2" data-testid={`leakage-link-${c.number}`}><SeverityDot severity={c.severity} />{c.number}</Link></td>
                     <td className="px-4 py-3 whitespace-nowrap"><div className="font-medium text-slate-900">{c.counterparty_name}</div><DomainBadge domain={c.domain} /></td>
                     <td className="px-4 py-3 whitespace-nowrap text-slate-600">{LEAK_TYPES[c.leak_type] || c.leak_type}</td>
-                    <td className="px-4 py-3 whitespace-nowrap num text-xs text-slate-600">{c.ref}<div className="text-slate-400">{fmtDate(c.txn_date)}</div></td>
+                    <td className="px-4 py-3 whitespace-nowrap num text-xs text-slate-600">{c.ref}<div className="text-slate-500">{fmtDate(c.txn_date)}</div></td>
                     <td className="px-4 py-3 whitespace-nowrap"><Money value={c.leak_amount} cur={c.currency} className="text-slate-900" /></td>
-                    <td className="px-4 py-3 whitespace-nowrap"><Money value={c.recovered_amount} cur={c.currency} className={c.recovered_amount ? "text-emerald-700" : "text-slate-300"} /></td>
+                    <td className="px-4 py-3 whitespace-nowrap"><Money value={c.recovered_amount} cur={c.currency} className={c.recovered_amount ? "text-emerald-700" : "text-slate-400"} /></td>
                     <td className="px-4 py-3"><StatusChip status={c.status} /></td>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-600 text-xs">{c.assignee_name || <span className="text-slate-400">Unassigned</span>}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-600 text-xs">{c.assignee_name || <span className="text-slate-500">Unassigned</span>}</td>
                     <td className={`px-4 py-3 whitespace-nowrap num text-xs font-semibold ${d < 0 ? "text-rose-600" : d < 15 ? "text-amber-600" : "text-slate-500"}`}>{d < 0 ? "Expired" : `${d}d`}</td>
                   </tr>
                 );

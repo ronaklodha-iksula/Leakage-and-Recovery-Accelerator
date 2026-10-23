@@ -10,7 +10,7 @@ import routes_admin
 import routes_ai
 import routes_cases
 import routes_data
-from seed import seed_if_empty
+from seed import seed_if_empty, backfill_batch_stats
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
@@ -32,9 +32,12 @@ async def startup():
     for old, new in RETIRED_ROLES.items():
         await db.users.update_many({"role": old}, {"$set": {"role": new}})
     await db.cases.create_index("id", unique=True)
+    await db.counterparties.create_index("id", unique=True)
+    await db.rules.create_index("id", unique=True)
     await db.transactions.create_index([("counterparty_id", 1), ("domain", 1), ("dup_key", 1)])
     await db.audit.create_index([("entity_id", 1), ("ts", -1)])
     await seed_if_empty()
+    await backfill_batch_stats()
 
 
 app.add_middleware(
