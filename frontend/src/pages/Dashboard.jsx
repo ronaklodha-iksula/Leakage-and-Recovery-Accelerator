@@ -19,8 +19,8 @@ const tip = { contentStyle: { background: "#fff", border: "1px solid #e2e8f0", b
 
 const CaseRow = ({ c, right }) => (
   <Link to={`/app/leakages/${c.id}`} data-testid={`dash-case-${c.number}`} className="flex items-center justify-between gap-3 py-2.5 border-b border-border last:border-0 hover:bg-slate-50 px-2 -mx-2 rounded-sm">
-    <div className="min-w-0">
-      <div className="text-sm font-semibold text-slate-900 flex items-center gap-2"><span className="num text-xs text-emerald-700">{c.number}</span><span className="truncate">{c.counterparty_name}</span></div>
+    <div className="min-w-0 flex-1">
+      <div className="text-sm font-semibold text-slate-900 flex items-center gap-2 min-w-0"><span className="num text-xs text-emerald-700 shrink-0 whitespace-nowrap">{c.number}</span><span className="truncate min-w-0">{c.counterparty_name}</span></div>
       <div className="text-xs text-slate-400 truncate num">{c.ref}</div>
     </div>
     <div className="text-right shrink-0">{right}</div>
@@ -113,9 +113,9 @@ export default function Dashboard() {
           {data.my_queue.map((c) => <CaseRow key={c.id} c={c} right={<StatusChip status={c.status} />} />)}
         </Panel>
         <Panel className="md:col-span-12" eyebrow="Workflow" title="Case status" testId="panel-status">
-          <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
             {Object.entries(data.status_counts).map(([s, n]) => (
-              <Link key={s} to={`/app/leakages?status=${s}`} className="border border-border rounded-sm p-3 hover:bg-slate-50" data-testid={`status-count-${s}`}>
+              <Link key={s} to={`/app/leakages?status=${s}`} className="min-w-0 border border-border rounded-sm p-3 hover:bg-slate-50 transition-colors" data-testid={`status-count-${s}`}>
                 <StatusChip status={s} /><div className="num text-xl font-bold text-slate-900 mt-2">{n}</div>
               </Link>
             ))}
